@@ -79,12 +79,15 @@ package org.apache.catalina;
  * attempted transition is not valid.
  *
  * @author Craig R. McClanahan
+ * <p>
+ * 定义了组件生命周期的一些方法，用于启动、停止Catalina组件
+ * <p>
+ * 组件的生命周期包括：init、start、stop、destory，以及各种事件的常量、操作LifecycleListener的API，典型的观察者模式
  */
 public interface Lifecycle {
 
 
-    // ----------------------------------------------------- Manifest Constants
-
+    // -------------------------- - Manifest Constants (定义各种EVENT事件)
 
     /**
      * The LifecycleEvent type for the "component before init" event.
@@ -175,6 +178,8 @@ public interface Lifecycle {
 
     /**
      * Add a LifecycleEvent listener to this component.
+     * <p>
+     * 注册一个LifecycleListener
      *
      * @param listener The listener to add
      */
@@ -183,16 +188,20 @@ public interface Lifecycle {
 
     /**
      * Get the life cycle listeners associated with this life cycle.
+     * <p>
+     * 获取所有注册的LifecycleListener
      *
      * @return An array containing the life cycle listeners associated with this
-     *         life cycle. If this component has no listeners registered, a
-     *         zero-length array is returned.
+     * life cycle. If this component has no listeners registered, a
+     * zero-length array is returned.
      */
     public LifecycleListener[] findLifecycleListeners();
 
 
     /**
      * Remove a LifecycleEvent listener from this component.
+     * <p>
+     * 移除指定的LifecycleListener
      *
      * @param listener The listener to remove
      */
@@ -202,14 +211,16 @@ public interface Lifecycle {
     /**
      * Prepare the component for starting. This method should perform any
      * initialization required post object creation. The following
+     * <p>
+     * 组件被实例化之后，调用该方法完成初始化工作，发会出以下事件
+     * <p>
      * {@link LifecycleEvent}s will be fired in the following order:
      * <ol>
-     *   <li>INIT_EVENT: On the successful completion of component
-     *                   initialization.</li>
+     * <li>INIT_EVENT: On the successful completion of component initialization.</li>
      * </ol>
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     public void init() throws LifecycleException;
 
@@ -220,24 +231,27 @@ public interface Lifecycle {
      * property getters/setters and life cycle methods of this component are
      * utilized. The following {@link LifecycleEvent}s will be fired in the
      * following order:
+     * <p>
+     * 在组件投入使用之前调用该方法，先后会发出以下事件：BEFORE_START_EVENT、START_EVENT、AFTER_START_EVENT
+     * <p>
      * <ol>
-     *   <li>BEFORE_START_EVENT: At the beginning of the method. It is as this
-     *                           point the state transitions to
-     *                           {@link LifecycleState#STARTING_PREP}.</li>
-     *   <li>START_EVENT: During the method once it is safe to call start() for
-     *                    any child components. It is at this point that the
-     *                    state transitions to {@link LifecycleState#STARTING}
-     *                    and that the public methods other than property
-     *                    getters/setters and life cycle methods may be
-     *                    used.</li>
-     *   <li>AFTER_START_EVENT: At the end of the method, immediately before it
-     *                          returns. It is at this point that the state
-     *                          transitions to {@link LifecycleState#STARTED}.
-     *                          </li>
+     * <li>BEFORE_START_EVENT: At the beginning of the method. It is as this
+     * point the state transitions to
+     * {@link LifecycleState#STARTING_PREP}.</li>
+     * <li>START_EVENT: During the method once it is safe to call start() for
+     * any child components. It is at this point that the
+     * state transitions to {@link LifecycleState#STARTING}
+     * and that the public methods other than property
+     * getters/setters and life cycle methods may be
+     * used.</li>
+     * <li>AFTER_START_EVENT: At the end of the method, immediately before it
+     * returns. It is at this point that the state
+     * transitions to {@link LifecycleState#STARTED}.
+     * </li>
      * </ol>
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     public void start() throws LifecycleException;
 
@@ -249,48 +263,56 @@ public interface Lifecycle {
      * getters/setters and life cycle methods should not be used. The following
      * {@link LifecycleEvent}s will be fired in the following order:
      * <ol>
-     *   <li>BEFORE_STOP_EVENT: At the beginning of the method. It is at this
-     *                          point that the state transitions to
-     *                          {@link LifecycleState#STOPPING_PREP}.</li>
-     *   <li>STOP_EVENT: During the method once it is safe to call stop() for
-     *                   any child components. It is at this point that the
-     *                   state transitions to {@link LifecycleState#STOPPING}
-     *                   and that the public methods other than property
-     *                   getters/setters and life cycle methods may no longer be
-     *                   used.</li>
-     *   <li>AFTER_STOP_EVENT: At the end of the method, immediately before it
-     *                         returns. It is at this point that the state
-     *                         transitions to {@link LifecycleState#STOPPED}.
-     *                         </li>
+     * <li>BEFORE_STOP_EVENT: At the beginning of the method. It is at this
+     * point that the state transitions to
+     * {@link LifecycleState#STOPPING_PREP}.</li>
+     * <li>STOP_EVENT: During the method once it is safe to call stop() for
+     * any child components. It is at this point that the
+     * state transitions to {@link LifecycleState#STOPPING}
+     * and that the public methods other than property
+     * getters/setters and life cycle methods may no longer be
+     * used.</li>
+     * <li>AFTER_STOP_EVENT: At the end of the method, immediately before it
+     * returns. It is at this point that the state
+     * transitions to {@link LifecycleState#STOPPED}.
+     * </li>
      * </ol>
-     *
+     * <p>
      * Note that if transitioning from {@link LifecycleState#FAILED} then the
      * three events above will be fired but the component will transition
      * directly from {@link LifecycleState#FAILED} to
+     * <p>
+     * 使组件停止工作
+     * <p>
      * {@link LifecycleState#STOPPING}, bypassing
      * {@link LifecycleState#STOPPING_PREP}
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that needs to be reported
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that needs to be reported
      */
     public void stop() throws LifecycleException;
 
     /**
      * Prepare to discard the object. The following {@link LifecycleEvent}s will
      * be fired in the following order:
+     * <p>
+     * 销毁组件时被调用
+     * <p>
      * <ol>
-     *   <li>DESTROY_EVENT: On the successful completion of component
-     *                      destruction.</li>
+     * <li>DESTROY_EVENT: On the successful completion of component
+     * destruction.</li>
      * </ol>
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     public void destroy() throws LifecycleException;
 
 
     /**
      * Obtain the current state of the source component.
+     * <p>
+     * 获取当组件的状态
      *
      * @return The current state of the source component.
      */
@@ -302,6 +324,8 @@ public interface Lifecycle {
      * for JMX. The format of this string may vary between point releases and
      * should not be relied upon to determine component state. To determine
      * component state, use {@link #getState()}.
+     * <p>
+     * 获取state的文字说明
      *
      * @return The name of the current component state.
      */

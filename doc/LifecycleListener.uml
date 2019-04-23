@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.catalina.LifecycleListener</OriginalElement>
+  <nodes>
+    <node x="594.0" y="91.0">org.apache.catalina.mbeans.GlobalResourcesLifecycleListener</node>
+    <node x="343.0" y="91.0">org.apache.catalina.core.JreMemoryLeakPreventionListener</node>
+    <node x="176.0" y="91.0">org.apache.catalina.core.StandardEngine.AccessLogListener</node>
+    <node x="1095.0" y="91.0">org.apache.catalina.startup.VersionLoggerListener</node>
+    <node x="838.0" y="91.0">org.apache.catalina.core.ThreadLocalLeakPreventionListener</node>
+    <node x="513.75" y="0.0">org.apache.catalina.LifecycleListener</node>
+    <node x="0.0" y="91.0">org.apache.catalina.core.AprLifecycleListener</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.catalina.startup.VersionLoggerListener" target="org.apache.catalina.LifecycleListener">
+      <point x="0.0" y="-15.5" />
+      <point x="1178.5" y="51.0" />
+      <point x="639.3333333333333" y="51.0" />
+      <point x="57.08333333333326" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" target="org.apache.catalina.LifecycleListener">
+      <point x="0.0" y="-15.5" />
+      <point x="706.0" y="71.0" />
+      <point x="593.6666666666666" y="71.0" />
+      <point x="11.416666666666629" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine.AccessLogListener" target="org.apache.catalina.LifecycleListener">
+      <point x="0.0" y="-15.5" />
+      <point x="249.5" y="61.0" />
+      <point x="548.0" y="61.0" />
+      <point x="-34.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.JreMemoryLeakPreventionListener" target="org.apache.catalina.LifecycleListener">
+      <point x="0.0" y="-15.5" />
+      <point x="458.5" y="71.0" />
+      <point x="570.8333333333334" y="71.0" />
+      <point x="-11.416666666666629" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.AprLifecycleListener" target="org.apache.catalina.LifecycleListener">
+      <point x="0.0" y="-15.5" />
+      <point x="78.0" y="51.0" />
+      <point x="525.1666666666666" y="51.0" />
+      <point x="-57.08333333333337" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.ThreadLocalLeakPreventionListener" target="org.apache.catalina.LifecycleListener">
+      <point x="0.0" y="-15.5" />
+      <point x="956.5" y="61.0" />
+      <point x="616.5" y="61.0" />
+      <point x="34.25" y="15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="621.0" y="3.5" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

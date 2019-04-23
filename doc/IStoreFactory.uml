@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.catalina.storeconfig.IStoreFactory</OriginalElement>
+  <nodes>
+    <node x="0.0" y="262.0">org.apache.catalina.storeconfig.JarScannerSF</node>
+    <node x="3595.0" y="262.0">org.apache.catalina.storeconfig.StandardServiceSF</node>
+    <node x="1677.0" y="262.0">org.apache.catalina.storeconfig.InterceptorSF</node>
+    <node x="584.0" y="262.0">org.apache.catalina.storeconfig.LoaderSF</node>
+    <node x="1742.0" y="0.0">org.apache.catalina.storeconfig.IStoreFactory</node>
+    <node x="2283.0" y="262.0">org.apache.catalina.storeconfig.WrapperLifecycleSF</node>
+    <node x="702.0" y="262.0">org.apache.catalina.storeconfig.StandardEngineSF</node>
+    <node x="1935.0" y="262.0">org.apache.catalina.storeconfig.PersistentManagerSF</node>
+    <node x="1322.0" y="262.0">org.apache.catalina.storeconfig.WatchedResourceSF</node>
+    <node x="2456.0" y="262.0">org.apache.catalina.storeconfig.StandardHostSF</node>
+    <node x="3288.0" y="262.0">org.apache.catalina.storeconfig.CredentialHandlerSF</node>
+    <node x="1817.0" y="262.0">org.apache.catalina.storeconfig.SenderSF</node>
+    <node x="1160.0" y="262.0">org.apache.catalina.storeconfig.CatalinaClusterSF</node>
+    <node x="2789.0" y="262.0">org.apache.catalina.storeconfig.GlobalNamingResourcesSF</node>
+    <node x="3001.0" y="262.0">org.apache.catalina.storeconfig.StandardServerSF</node>
+    <node x="3466.0" y="262.0">org.apache.catalina.storeconfig.ManagerSF</node>
+    <node x="1005.0" y="262.0">org.apache.catalina.storeconfig.OpenSSLConfSF</node>
+    <node x="2610.0" y="262.0">org.apache.catalina.storeconfig.WebResourceRootSF</node>
+    <node x="469.0" y="262.0">org.apache.catalina.storeconfig.RealmSF</node>
+    <node x="138.0" y="262.0">org.apache.catalina.storeconfig.StandardContextSF</node>
+    <node x="3162.0" y="262.0">org.apache.catalina.storeconfig.ChannelSF</node>
+    <node x="867.0" y="262.0">org.apache.catalina.storeconfig.ConnectorSF</node>
+    <node x="308.0" y="262.0">org.apache.catalina.storeconfig.SSLHostConfigSF</node>
+    <node x="1499.0" y="262.0">org.apache.catalina.storeconfig.NamingResourcesSF</node>
+    <node x="2115.0" y="262.0">org.apache.catalina.storeconfig.WrapperListenerSF</node>
+    <node x="1731.5" y="81.0">org.apache.catalina.storeconfig.StoreFactoryBase</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.catalina.storeconfig.OpenSSLConfSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="1072.5" y="202.0" />
+      <point x="1775.25" y="202.0" />
+      <point x="-26.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.CredentialHandlerSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="3367.0" y="152.0" />
+      <point x="1856.9166666666665" y="152.0" />
+      <point x="55.416666666666515" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.StoreFactoryBase" target="org.apache.catalina.storeconfig.IStoreFactory">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.NamingResourcesSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="1578.0" y="232.0" />
+      <point x="1792.75" y="232.0" />
+      <point x="-8.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.InterceptorSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="1737.0" y="242.0" />
+      <point x="1798.5833333333333" y="242.0" />
+      <point x="-2.9166666666667425" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.WatchedResourceSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="1400.5" y="222.0" />
+      <point x="1786.9166666666667" y="222.0" />
+      <point x="-14.583333333333258" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.RealmSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="516.5" y="162.0" />
+      <point x="1751.9166666666667" y="162.0" />
+      <point x="-49.58333333333326" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.SSLHostConfigSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="378.5" y="152.0" />
+      <point x="1746.0833333333333" y="152.0" />
+      <point x="-55.41666666666674" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.PersistentManagerSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="2015.0" y="232.0" />
+      <point x="1810.25" y="232.0" />
+      <point x="8.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.GlobalNamingResourcesSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="2885.0" y="182.0" />
+      <point x="1839.4166666666665" y="182.0" />
+      <point x="37.916666666666515" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.WrapperLifecycleSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="2359.5" y="212.0" />
+      <point x="1821.9166666666665" y="212.0" />
+      <point x="20.416666666666515" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.JarScannerSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="59.0" y="132.0" />
+      <point x="1734.4166666666667" y="132.0" />
+      <point x="-67.08333333333326" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.LoaderSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="633.0" y="172.0" />
+      <point x="1757.75" y="172.0" />
+      <point x="-43.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.WrapperListenerSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="2189.0" y="222.0" />
+      <point x="1816.0833333333333" y="222.0" />
+      <point x="14.583333333333258" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.ChannelSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="3215.0" y="162.0" />
+      <point x="1851.0833333333333" y="162.0" />
+      <point x="49.58333333333326" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.StandardHostSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="2523.0" y="202.0" />
+      <point x="1827.75" y="202.0" />
+      <point x="26.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.StandardServerSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="-1.1368683772161603E-13" y="-15.5" />
+      <point x="3071.5" y="172.0" />
+      <point x="1845.25" y="172.0" />
+      <point x="43.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.WebResourceRootSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="2689.5" y="192.0" />
+      <point x="1833.5833333333333" y="192.0" />
+      <point x="32.08333333333326" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.StandardEngineSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="774.5" y="182.0" />
+      <point x="1763.5833333333333" y="182.0" />
+      <point x="-37.91666666666674" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.StandardContextSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="213.0" y="142.0" />
+      <point x="1740.25" y="142.0" />
+      <point x="-61.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.CatalinaClusterSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="1231.0" y="212.0" />
+      <point x="1781.0833333333333" y="212.0" />
+      <point x="-20.416666666666742" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.StandardServiceSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="3668.0" y="132.0" />
+      <point x="1868.5833333333333" y="132.0" />
+      <point x="67.08333333333326" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.ManagerSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="3520.5" y="142.0" />
+      <point x="1862.75" y="142.0" />
+      <point x="61.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.SenderSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="1866.0" y="242.0" />
+      <point x="1804.4166666666667" y="242.0" />
+      <point x="2.9166666666667425" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.storeconfig.ConnectorSF" target="org.apache.catalina.storeconfig.StoreFactoryBase">
+      <point x="0.0" y="-15.5" />
+      <point x="926.0" y="192.0" />
+      <point x="1769.4166666666667" y="192.0" />
+      <point x="-32.08333333333326" y="15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="1777.0" y="96.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

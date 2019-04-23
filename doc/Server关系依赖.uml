@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.catalina.Server</OriginalElement>
+  <nodes>
+    <node x="146.7105654761907" y="0.0">javax.management.MBeanRegistration</node>
+    <node x="388.513640873016" y="575.0">org.apache.catalina.core.StandardEngine</node>
+    <node x="556.9709821428575" y="0.0">org.apache.catalina.Lifecycle</node>
+    <node x="574.9709821428575" y="111.0">org.apache.catalina.util.LifecycleBase</node>
+    <node x="608.1282242063494" y="293.0">org.apache.catalina.connector.Connector</node>
+    <node x="0.0" y="575.0">org.apache.catalina.core.StandardHost</node>
+    <node x="498.513640873016" y="293.0">org.apache.catalina.Engine</node>
+    <node x="653.6594742063494" y="696.0">org.apache.catalina.core.StandardServer</node>
+    <node x="174.66666666666669" y="575.0">org.apache.catalina.realm.DataSourceRealm</node>
+    <node x="543.7428075396826" y="575.0">org.apache.catalina.core.StandardService</node>
+    <node x="67.66666666666669" y="394.0">org.apache.catalina.Host</node>
+    <node x="270.201140873016" y="394.0">org.apache.catalina.Realm</node>
+    <node x="202.62003968254004" y="192.0">org.apache.catalina.util.LifecycleMBeanBase</node>
+    <node x="652.9094742063494" y="394.0">org.apache.catalina.Service</node>
+    <node x="185.87003968253998" y="111.0">org.apache.catalina.JmxEnabled</node>
+    <node x="758.3020833333334" y="293.0">org.apache.catalina.Server</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.catalina.core.StandardService" target="org.apache.catalina.Engine">
+      <point x="-16.75" y="-15.5" />
+      <point x="593.9928075396826" y="455.0" />
+      <point x="547.013640873016" y="455.0" />
+      <point x="547.013640873016" y="374.0" />
+      <point x="548.6803075396826" y="374.0" />
+      <point x="7.166666666666686" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Host" target="org.apache.catalina.Lifecycle">
+      <point x="0.0" y="-15.5" />
+      <point x="105.16666666666669" y="71.0" />
+      <point x="572.9709821428575" y="71.0" />
+      <point x="-32.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.util.LifecycleBase" target="org.apache.catalina.Lifecycle">
+      <point x="-30.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardService" target="org.apache.catalina.connector.Connector">
+      <point x="5.583333333333371" y="-15.5" />
+      <point x="616.326140873016" y="495.0" />
+      <point x="620.4094742063494" y="495.0" />
+      <point x="620.4094742063494" y="374.0" />
+      <point x="616.9615575396826" y="374.0" />
+      <point x="-44.166666666666686" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardService" target="org.apache.catalina.util.LifecycleMBeanBase">
+      <point x="-61.41666666666663" y="-15.5" />
+      <point x="549.326140873016" y="495.0" />
+      <point x="455.013640873016" y="495.0" />
+      <point x="455.013640873016" y="263.0" />
+      <point x="310.55753968254004" y="263.0" />
+      <point x="29.4375" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine" target="org.apache.catalina.Server">
+      <point x="58.1875" y="-15.5" />
+      <point x="513.201140873016" y="535.0" />
+      <point x="782.544890873016" y="535.0" />
+      <point x="782.544890873016" y="374.0" />
+      <point x="792.46875" y="374.0" />
+      <point x="-6.833333333333314" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.connector.Connector" target="org.apache.catalina.util.LifecycleBase">
+      <point x="26.5" y="-15.5" />
+      <point x="687.6282242063494" y="172.0" />
+      <point x="649.9709821428575" y="172.0" />
+      <point x="15.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardHost" target="org.apache.catalina.JmxEnabled">
+      <point x="-30.5" y="-15.5" />
+      <point x="30.5" y="555.0" />
+      <point x="35.166666666666686" y="555.0" />
+      <point x="35.166666666666686" y="172.0" />
+      <point x="204.5367063492066" y="172.0" />
+      <point x="-37.33333333333337" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardServer" target="org.apache.catalina.Service">
+      <point x="0.0" y="-15.5" />
+      <point x="718.1594742063494" y="636.0" />
+      <point x="741.1457093253971" y="636.0" />
+      <point x="741.1457093253971" y="515.0" />
+      <point x="718.1594742063494" y="515.0" />
+      <point x="21.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Engine" target="org.apache.catalina.Service">
+      <point x="35.83333333333337" y="15.5" />
+      <point x="577.3469742063494" y="354.0" />
+      <point x="669.2219742063494" y="354.0" />
+      <point x="-27.1875" y="-15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardServer" target="org.apache.catalina.Server">
+      <point x="28.666666666666657" y="-15.5" />
+      <point x="746.826140873016" y="656.0" />
+      <point x="829.46875" y="656.0" />
+      <point x="829.46875" y="374.0" />
+      <point x="833.46875" y="374.0" />
+      <point x="34.16666666666663" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardServer" target="org.apache.catalina.util.LifecycleMBeanBase">
+      <point x="-43.0" y="-15.5" />
+      <point x="675.1594742063494" y="666.0" />
+      <point x="164.16666666666669" y="666.0" />
+      <point x="164.16666666666669" y="263.0" />
+      <point x="251.68253968254004" y="263.0" />
+      <point x="-29.4375" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.JmxEnabled" target="javax.management.MBeanRegistration">
+      <point x="0.0" y="-15.5" />
+      <point x="241.87003968253998" y="51.0" />
+      <point x="221.7105654761907" y="51.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Service" target="org.apache.catalina.Server">
+      <point x="27.1875" y="-15.5" />
+      <point x="723.5969742063494" y="354.0" />
+      <point x="765.1354166666667" y="354.0" />
+      <point x="-34.166666666666686" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardHost" target="org.apache.catalina.Engine">
+      <point x="10.166666666666629" y="-15.5" />
+      <point x="71.16666666666663" y="555.0" />
+      <point x="57.166666666666686" y="555.0" />
+      <point x="57.166666666666686" y="364.0" />
+      <point x="505.68030753968264" y="364.0" />
+      <point x="-35.83333333333334" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine" target="org.apache.catalina.util.LifecycleMBeanBase">
+      <point x="-24.9375" y="-15.5" />
+      <point x="430.076140873016" y="525.0" />
+      <point x="363.701140873016" y="525.0" />
+      <point x="363.701140873016" y="273.0" />
+      <point x="290.93253968254004" y="273.0" />
+      <point x="9.8125" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.connector.Connector" target="org.apache.catalina.util.LifecycleMBeanBase">
+      <point x="-26.5" y="-15.5" />
+      <point x="634.6282242063494" y="243.0" />
+      <point x="349.80753968254004" y="243.0" />
+      <point x="68.6875" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Server" target="org.apache.catalina.Service">
+      <point x="-20.5" y="15.5" />
+      <point x="778.8020833333334" y="364.0" />
+      <point x="734.4719742063494" y="364.0" />
+      <point x="38.06250000000003" y="-15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardServer" target="org.apache.catalina.util.LifecycleBase">
+      <point x="43.00000000000003" y="-15.5" />
+      <point x="761.1594742063494" y="666.0" />
+      <point x="850.8020833333334" y="666.0" />
+      <point x="850.8020833333334" y="162.0" />
+      <point x="679.9709821428575" y="162.0" />
+      <point x="45.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine" target="org.apache.catalina.Service">
+      <point x="41.5625" y="-15.5" />
+      <point x="496.576140873016" y="515.0" />
+      <point x="674.6594742063494" y="515.0" />
+      <point x="-21.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine" target="org.apache.catalina.Host">
+      <point x="-58.1875" y="-15.5" />
+      <point x="396.826140873016" y="545.0" />
+      <point x="130.16666666666669" y="545.0" />
+      <point x="25.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardService" target="org.apache.catalina.Service">
+      <point x="39.08333333333337" y="-15.5" />
+      <point x="649.826140873016" y="525.0" />
+      <point x="689.1594742063494" y="525.0" />
+      <point x="-7.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Service" target="org.apache.catalina.Engine">
+      <point x="-38.0625" y="-15.5" />
+      <point x="658.3469742063494" y="364.0" />
+      <point x="563.013640873016" y="364.0" />
+      <point x="21.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Engine" target="org.apache.catalina.Lifecycle">
+      <point x="0.0" y="-15.5" />
+      <point x="541.513640873016" y="91.0" />
+      <point x="594.3043154761907" y="91.0" />
+      <point x="-10.666666666666686" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Server" target="org.apache.catalina.Lifecycle">
+      <point x="0.0" y="-15.5" />
+      <point x="799.3020833333334" y="71.0" />
+      <point x="636.9709821428573" y="71.0" />
+      <point x="31.999999999999943" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.util.LifecycleMBeanBase" target="org.apache.catalina.JmxEnabled">
+      <point x="-39.25" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.realm.DataSourceRealm" target="org.apache.catalina.Realm">
+      <point x="35.75" y="-15.5" />
+      <point x="281.9166666666667" y="555.0" />
+      <point x="290.951140873016" y="555.0" />
+      <point x="-20.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.connector.Connector" target="org.apache.catalina.Service">
+      <point x="44.16666666666663" y="15.5" />
+      <point x="705.294890873016" y="374.0" />
+      <point x="701.8469742063494" y="374.0" />
+      <point x="5.4375" y="-15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardService" target="org.apache.catalina.Server">
+      <point x="61.41666666666663" y="-15.5" />
+      <point x="672.1594742063493" y="555.0" />
+      <point x="818.46875" y="555.0" />
+      <point x="818.46875" y="374.0" />
+      <point x="819.8020833333334" y="374.0" />
+      <point x="20.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.util.LifecycleMBeanBase" target="org.apache.catalina.util.LifecycleBase">
+      <point x="39.25" y="-15.5" />
+      <point x="320.37003968254004" y="172.0" />
+      <point x="589.9709821428575" y="172.0" />
+      <point x="-45.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardServer" target="org.apache.catalina.core.StandardService">
+      <point x="-28.666666666666686" y="-15.5" />
+      <point x="689.4928075396826" y="656.0" />
+      <point x="610.7428075396826" y="656.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Service" target="org.apache.catalina.Lifecycle">
+      <point x="16.3125" y="-15.5" />
+      <point x="712.7219742063494" y="344.0" />
+      <point x="733.8782242063494" y="344.0" />
+      <point x="733.8782242063494" y="81.0" />
+      <point x="626.3043154761907" y="81.0" />
+      <point x="21.333333333333314" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardServer" target="org.apache.catalina.Lifecycle">
+      <point x="57.333333333333286" y="-15.5" />
+      <point x="775.4928075396826" y="676.0" />
+      <point x="861.8020833333334" y="676.0" />
+      <point x="861.8020833333334" y="61.0" />
+      <point x="647.6376488095241" y="61.0" />
+      <point x="42.66666666666663" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine" target="org.apache.catalina.Lifecycle">
+      <point x="-8.3125" y="-15.5" />
+      <point x="446.701140873016" y="515.0" />
+      <point x="419.3541666666667" y="515.0" />
+      <point x="419.3541666666667" y="81.0" />
+      <point x="583.6376488095241" y="81.0" />
+      <point x="-21.333333333333343" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardService" target="org.apache.catalina.util.LifecycleBase">
+      <point x="-5.5833333333332575" y="-15.5" />
+      <point x="605.1594742063494" y="445.0" />
+      <point x="597.6282242063494" y="445.0" />
+      <point x="597.6282242063494" y="172.0" />
+      <point x="619.9709821428575" y="172.0" />
+      <point x="-15.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine" target="org.apache.catalina.Engine">
+      <point x="8.3125" y="-15.5" />
+      <point x="463.326140873016" y="555.0" />
+      <point x="466.013640873016" y="555.0" />
+      <point x="466.013640873016" y="374.0" />
+      <point x="520.013640873016" y="374.0" />
+      <point x="-21.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine" target="org.apache.catalina.Realm">
+      <point x="-41.5625" y="-15.5" />
+      <point x="413.451140873016" y="535.0" />
+      <point x="332.451140873016" y="535.0" />
+      <point x="20.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardHost" target="org.apache.catalina.util.LifecycleMBeanBase">
+      <point x="-10.166666666666686" y="-15.5" />
+      <point x="50.833333333333314" y="555.0" />
+      <point x="46.166666666666686" y="555.0" />
+      <point x="46.166666666666686" y="243.0" />
+      <point x="212.43253968254004" y="243.0" />
+      <point x="-68.6875" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardHost" target="org.apache.catalina.Host">
+      <point x="50.833333333333314" y="-15.5" />
+      <point x="111.83333333333331" y="555.0" />
+      <point x="105.16666666666669" y="555.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardService" target="org.apache.catalina.JmxEnabled">
+      <point x="-39.08333333333326" y="-15.5" />
+      <point x="571.6594742063494" y="475.0" />
+      <point x="488.013640873016" y="475.0" />
+      <point x="488.013640873016" y="162.0" />
+      <point x="279.20337301587335" y="162.0" />
+      <point x="37.33333333333337" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardHost" target="org.apache.catalina.Lifecycle">
+      <point x="-50.833333333333314" y="-15.5" />
+      <point x="10.166666666666686" y="555.0" />
+      <point x="24.166666666666686" y="555.0" />
+      <point x="24.166666666666686" y="61.0" />
+      <point x="562.3043154761908" y="61.0" />
+      <point x="-42.66666666666666" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.Service" target="org.apache.catalina.connector.Connector">
+      <point x="-16.3125" y="-15.5" />
+      <point x="680.0969742063494" y="344.0" />
+      <point x="669.9615575396828" y="344.0" />
+      <point x="8.833333333333371" y="15.5" />
+    </edge>
+    <edge source="org.apache.catalina.realm.DataSourceRealm" target="org.apache.catalina.util.LifecycleMBeanBase">
+      <point x="-35.75" y="-15.5" />
+      <point x="210.41666666666669" y="555.0" />
+      <point x="233.52641369047635" y="555.0" />
+      <point x="233.52641369047635" y="273.0" />
+      <point x="271.30753968254004" y="273.0" />
+      <point x="-9.8125" y="15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="475.0" y="403.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

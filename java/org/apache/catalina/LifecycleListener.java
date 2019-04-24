@@ -26,9 +26,10 @@ package org.apache.catalina;
  * change has taken place.
  *
  * @author Craig R. McClanahan
+ * <p>
+ * 监听器(要订阅事件的实体类需要实现LifecycleListener)
  */
 public interface LifecycleListener {
-
 
     /**
      * Acknowledge the occurrence of the specified event.

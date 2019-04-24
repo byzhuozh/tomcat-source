@@ -21,17 +21,41 @@ package org.apache.catalina;
  * See {@link Lifecycle} for the state transition diagram.
  */
 public enum LifecycleState {
+
+    // LifecycleBase实例化完成时的状态
     NEW(false, null),
+
+    // 容器正在初始化的状态，在INITIALIZED之前
     INITIALIZING(false, Lifecycle.BEFORE_INIT_EVENT),
+
+    // 初始化完成的状态
     INITIALIZED(false, Lifecycle.AFTER_INIT_EVENT),
+
+    // 启动前
     STARTING_PREP(false, Lifecycle.BEFORE_START_EVENT),
+
+    // 启动过程中的状态
     STARTING(true, Lifecycle.START_EVENT),
+
+    // 启动完成
     STARTED(true, Lifecycle.AFTER_START_EVENT),
+
+    // 停止前的状态
     STOPPING_PREP(true, Lifecycle.BEFORE_STOP_EVENT),
+
+    // 停止过程中
     STOPPING(false, Lifecycle.STOP_EVENT),
+
+    // 停止完成
     STOPPED(false, Lifecycle.AFTER_STOP_EVENT),
+
+    // 销毁中
     DESTROYING(false, Lifecycle.BEFORE_DESTROY_EVENT),
+
+    // 完成销毁
     DESTROYED(false, Lifecycle.AFTER_DESTROY_EVENT),
+
+    // 启动、停止过程中出现异常
     FAILED(false, null);
 
     private final boolean available;

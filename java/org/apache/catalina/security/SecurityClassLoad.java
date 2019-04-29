@@ -32,11 +32,22 @@ public final class SecurityClassLoad {
 
     static void securityClassLoad(ClassLoader loader, boolean requireSecurityManager) throws Exception {
 
+        /**
+         * 检查是否安全, 如果不安全,则直接结束
+         */
         if (requireSecurityManager && System.getSecurityManager() == null) {
             return;
         }
 
+        /**
+         *  加载Tomcat容器所需的class
+         *  该类时加载Tomcat容器中类资源，传递的ClassLoader时catalinaLoader，
+         *  也就是说，Tomcat容器的类资源都是catalinaLoader加载完成的。
+         */
+
+        //Tomcat核心class，即org.apache.catalina.core路径下的class
         loadCorePackage(loader);
+
         loadCoyotePackage(loader);
         loadLoaderPackage(loader);
         loadRealmPackage(loader);
@@ -186,7 +197,7 @@ public final class SecurityClassLoad {
 
     private static final void loadAnonymousInnerClasses(ClassLoader loader, String enclosingClass) {
         try {
-            for (int i = 1;; i++) {
+            for (int i = 1; ; i++) {
                 loader.loadClass(enclosingClass + '$' + i);
             }
         } catch (ClassNotFoundException ignored) {

@@ -40,6 +40,9 @@ public abstract class LifecycleBase implements Lifecycle {
 
     private static final Log log = LogFactory.getLog(LifecycleBase.class);
 
+    /**
+     * 日志信息参数化输出的，支持国际化
+     */
     private static final StringManager sm = StringManager.getManager(LifecycleBase.class);
 
 

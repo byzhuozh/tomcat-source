@@ -30,6 +30,16 @@ public final class SecurityClassLoad {
         securityClassLoad(loader, true);
     }
 
+    /**
+     * 加载 tomcat 容器所需的类：
+     *      Tomcat核心class，即org.apache.catalina.core路径下的class；
+     *      org.apache.catalina.loader.WebappClassLoader$PrivilegedFindResourceByName；
+     *      Tomcat有关session的class，即org.apache.catalina.session路径下的class；
+     *      Tomcat工具类的class，即org.apache.catalina.util路径下的class；
+     *      javax.servlet.http.Cookie；
+     *      Tomcat处理请求的class，即org.apache.catalina.connector路径下的class；
+     *      Tomcat其它工具类的class，也是org.apache.catalina.util路径下的class；
+     */
     static void securityClassLoad(ClassLoader loader, boolean requireSecurityManager) throws Exception {
 
         /**
@@ -40,26 +50,30 @@ public final class SecurityClassLoad {
         }
 
         /**
-         *  加载Tomcat容器所需的class
-         *  该类时加载Tomcat容器中类资源，传递的ClassLoader时catalinaLoader，
+         *  加载Tomcat容器所需的class， 该类时加载Tomcat容器中类资源，传递的ClassLoader时catalinaLoader，
          *  也就是说，Tomcat容器的类资源都是catalinaLoader加载完成的。
          */
 
         //Tomcat核心class，即org.apache.catalina.core路径下的class
         loadCorePackage(loader);
-
         loadCoyotePackage(loader);
-        loadLoaderPackage(loader);
+        loadLoaderPackage(loader);  // WebappClassLoader
         loadRealmPackage(loader);
         loadServletsPackage(loader);
-        loadSessionPackage(loader);
-        loadUtilPackage(loader);
+        loadSessionPackage(loader); // Tomcat有关session的class
+        loadUtilPackage(loader);   // Tomcat工具类的class
         loadValvesPackage(loader);
-        loadJavaxPackage(loader);
+        loadJavaxPackage(loader);   // javax.servlet.http.Cookie
         loadConnectorPackage(loader);
         loadTomcatPackage(loader);
     }
 
+    /**
+     *  catalinaClassLoader 加载了该包下的类。根据之前的理解：catalinaClassLoader 加载的类是Tomcat容器私有的类加载器，
+     *  加载路径中的class对于Webapp不可见。
+     * @param loader
+     * @throws Exception
+     */
     private static final void loadCorePackage(ClassLoader loader) throws Exception {
         final String basePackage = "org.apache.catalina.core.";
         loader.loadClass(basePackage + "AccessLogAdapter");

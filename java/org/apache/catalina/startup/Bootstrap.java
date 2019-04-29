@@ -129,13 +129,16 @@ public final class Bootstrap {
 
     /**
      * Daemon reference.
+     * Catalina 实例
      */
     private Object catalinaDaemon = null;
 
-
+    /**
+     * 加载器
+     */
     ClassLoader commonLoader = null;
-    ClassLoader catalinaLoader = null;
-    ClassLoader sharedLoader = null;
+    ClassLoader catalinaLoader = null;  // 父加载器 --> commonLoader
+    ClassLoader sharedLoader = null;    // 父加载器 --> commonLoader
 
 
     // -------------------------------------------------------- Private Methods
@@ -293,6 +296,7 @@ public final class Bootstrap {
         // Set the shared extensions class loader
         if (log.isDebugEnabled())
             log.debug("Setting startup class properties");
+
         String methodName = "setParentClassLoader";
         Class<?> paramTypes[] = new Class[1];
         paramTypes[0] = Class.forName("java.lang.ClassLoader");    // 创建一个抽象类类加载器类对象
@@ -310,13 +314,15 @@ public final class Bootstrap {
     /**
      * Load daemon.
      */
-    private void load(String[] arguments)
-            throws Exception {
-
+    private void load(String[] arguments) throws Exception {
         // Call the load() method
+        // 要调用的方法名
         String methodName = "load";
+        // 参数名
         Object param[];
+        // 参数值
         Class<?> paramTypes[];
+
         if (arguments == null || arguments.length == 0) {
             paramTypes = null;
             param = null;
@@ -330,6 +336,8 @@ public final class Bootstrap {
                 catalinaDaemon.getClass().getMethod(methodName, paramTypes);
         if (log.isDebugEnabled())
             log.debug("Calling startup class " + method);
+
+        // 这里会使程序产生两个分支，调用Catalina#load()和Catalina#load(String args[])两个方法。
         method.invoke(catalinaDaemon, param);
 
     }
@@ -522,8 +530,8 @@ public final class Bootstrap {
             } else if (command.equals("stopd")) {
                 args[args.length - 1] = "stop";
                 daemon.stop();
-            } else if (command.equals("start")) {
-                daemon.setAwait(true);
+            } else if (command.equals("start")) {  //无参启动入口
+                daemon.setAwait(true);   // 阻塞
                 daemon.load(args);
                 daemon.start();
                 if (null == daemon.getServer()) {

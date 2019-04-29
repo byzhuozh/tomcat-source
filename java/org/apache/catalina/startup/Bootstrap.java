@@ -143,11 +143,15 @@ public final class Bootstrap {
 
     private void initClassLoaders() {
         try {
+            // 创建一个 “公用” 类加载器，父类加载器为 null
             commonLoader = createClassLoader("common", null);
             if( commonLoader == null ) {
                 // no config file, default to this loader - we might be in a 'single' env.
+                // 如果为 null,则默认使用 classLoader
                 commonLoader=this.getClass().getClassLoader();
             }
+            // 下面两个类加载器的父加载器为上面的公用加载器
+            // catalina.properties 中的 key:sever.loader, value:为空，直接返回
             catalinaLoader = createClassLoader("server", commonLoader);
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
@@ -249,34 +253,38 @@ public final class Bootstrap {
 
 
     /**
-     * Initialize daemon.
+     * Initialize daemon.   初始化该守护程序
      * @throws Exception Fatal initialization error
      */
     public void init() throws Exception {
 
+        // 初始化类加载器
+        // tomcat 独特的类加载器，违背双亲委派模型
         initClassLoaders();
 
+        // 设置线程上下文类加载器
         Thread.currentThread().setContextClassLoader(catalinaLoader);
 
+        // 线程安全的加载 class, 负责加载tomcat 容器所需的 class, 检查是否安全，不安全直接结束
         SecurityClassLoad.securityClassLoad(catalinaLoader);
 
         // Load our startup class and call its process() method
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
-        Class<?> startupClass = catalinaLoader.loadClass("org.apache.catalina.startup.Catalina");
-        Object startupInstance = startupClass.getConstructor().newInstance();
+        Class<?> startupClass = catalinaLoader.loadClass("org.apache.catalina.startup.Catalina");  // 加载主类
+        Object startupInstance = startupClass.getConstructor().newInstance();       // 反射获取实例
 
         // Set the shared extensions class loader
         if (log.isDebugEnabled())
             log.debug("Setting startup class properties");
         String methodName = "setParentClassLoader";
         Class<?> paramTypes[] = new Class[1];
-        paramTypes[0] = Class.forName("java.lang.ClassLoader");
-        Object paramValues[] = new Object[1];
-        paramValues[0] = sharedLoader;
+        paramTypes[0] = Class.forName("java.lang.ClassLoader");    // 创建一个抽象类类加载器类对象
+        Object paramValues[] = new Object[1];       // 创建一个对象分组
+        paramValues[0] = sharedLoader;      // 对象数组中放入分享类加载器
         Method method =
-            startupInstance.getClass().getMethod(methodName, paramTypes);
-        method.invoke(startupInstance, paramValues);
+            startupInstance.getClass().getMethod(methodName, paramTypes);   // 从 Catalina 类获取 setParentClassLoader 方法对象
+        method.invoke(startupInstance, paramValues);    // 调用该方法，传入 sharedLoader, Catalina.setParentClassLoader = shareLoader
 
         catalinaDaemon = startupInstance;
 
@@ -456,16 +464,22 @@ public final class Bootstrap {
      */
     public static void main(String args[]) {
 
+        //daemon 就是 bootstrap
         if (daemon == null) {
-            // Don't set daemon until init() has completed
+            // Don't set daemon until init() has completed   不要在 init() 完成之前设置守护者
+            // 如果守护线程是 null 创建一个 bootstrap
             Bootstrap bootstrap = new Bootstrap();
             try {
+                // 初始化
                 bootstrap.init();
             } catch (Throwable t) {
+                // 处理异常（抛出）
                 handleThrowable(t);
+                // 打印异常
                 t.printStackTrace();
                 return;
             }
+            // 初始化结束，设置 bootstrap 为守护者
             daemon = bootstrap;
         } else {
             // When running as a service the call to stop will be on a new

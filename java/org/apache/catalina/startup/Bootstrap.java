@@ -518,22 +518,30 @@ public final class Bootstrap {
         }
 
         try {
+            // 命令
             String command = "start";
+            // 如果命令行中输入了参数
             if (args.length > 0) {
+                // 命令 = 最后一个命令
                 command = args[args.length - 1];
             }
 
+            // 如果命令是启动
             if (command.equals("startd")) {
                 args[args.length - 1] = "start";
                 daemon.load(args);
                 daemon.start();
+
+            // 如果命令是停止了
             } else if (command.equals("stopd")) {
                 args[args.length - 1] = "stop";
                 daemon.stop();
+
+            // 如果命令是启动
             } else if (command.equals("start")) {  //无参启动入口
-                daemon.setAwait(true);   // 阻塞
-                daemon.load(args);
-                daemon.start();
+                daemon.setAwait(true);   // bootstrap 和 Catalina 一脉相连, 这里设置, 方法内部设置 Catalina 实例setAwait方法
+                daemon.load(args);  // args 为 空,方法内部调用 Catalina 的 load 方法.
+                daemon.start();     // 相同, 反射调用 Catalina 的 start 方法 ,至此,启动结束
                 if (null == daemon.getServer()) {
                     System.exit(1);
                 }

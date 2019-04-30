@@ -40,6 +40,9 @@ public abstract class LifecycleBase implements Lifecycle {
 
     private static final Log log = LogFactory.getLog(LifecycleBase.class);
 
+    /**
+     * 日志信息参数化输出的，支持国际化
+     */
     private static final StringManager sm = StringManager.getManager(LifecycleBase.class);
 
 
@@ -89,8 +92,11 @@ public abstract class LifecycleBase implements Lifecycle {
      * @param data  Data associated with event.
      */
     protected void fireLifecycleEvent(String type, Object data) {
+        // 事件监听,观察者模式的另一种方式
         LifecycleEvent event = new LifecycleEvent(this, type, data);
+        // 循环通知所有生命周期时间侦听器
         for (LifecycleListener listener : lifecycleListeners) {
+            // 每个监听器都有自己的逻辑
             listener.lifecycleEvent(event);
         }
     }
@@ -98,13 +104,24 @@ public abstract class LifecycleBase implements Lifecycle {
 
     @Override
     public final synchronized void init() throws LifecycleException {
+        // 如果不是 NEW 的状态, 则抛出异常
         if (!state.equals(LifecycleState.NEW)) {
             invalidTransition(Lifecycle.BEFORE_INIT_EVENT);
         }
 
         try {
+            // 容器状态设置为：初始化中
             setStateInternal(LifecycleState.INITIALIZING, null, false);
+
+            // 模板方法
+            /**
+             * 采用模板方法模式来对所有支持生命周期管理的组件的生命周期各个阶段进行了总体管理，
+             * 每个需要生命周期管理的组件只需要继承这个基类，
+             * 然后覆盖对应的钩子方法即可完成相应的声明周期阶段的管理工作
+             */
             initInternal();
+
+            // 容器状态设置为：初始化完成的状态
             setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -123,8 +140,9 @@ public abstract class LifecycleBase implements Lifecycle {
     @Override
     public final synchronized void start() throws LifecycleException {
 
-        if (LifecycleState.STARTING_PREP.equals(state) || LifecycleState.STARTING.equals(state) ||
-                LifecycleState.STARTED.equals(state)) {
+        if (LifecycleState.STARTING_PREP.equals(state)
+                || LifecycleState.STARTING.equals(state)
+                || LifecycleState.STARTED.equals(state)) {
 
             if (log.isDebugEnabled()) {
                 Exception e = new LifecycleException();
@@ -147,7 +165,10 @@ public abstract class LifecycleBase implements Lifecycle {
 
         try {
             setStateInternal(LifecycleState.STARTING_PREP, null, false);
+
+            // 启动容器
             startInternal();
+
             if (state.equals(LifecycleState.FAILED)) {
                 // This is a 'controlled' failure. The component put itself into the
                 // FAILED state so call stop() to complete the clean-up.

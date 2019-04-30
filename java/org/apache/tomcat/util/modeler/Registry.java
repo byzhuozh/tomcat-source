@@ -619,6 +619,7 @@ public class Registry implements RegistryMBean, MBeanRegistration  {
             ManagedBean managed = findManagedBean(null, bean.getClass(), type);
 
             // The real mbean is created and registered
+            // 创建一个 DynamicMBean
             DynamicMBean mbean = managed.createMBean(bean);
 
             if(  getMBeanServer().isRegistered( oname )) {
@@ -628,6 +629,7 @@ public class Registry implements RegistryMBean, MBeanRegistration  {
                 getMBeanServer().unregisterMBean( oname );
             }
 
+            // 注册到 MBeanServer
             getMBeanServer().registerMBean( mbean, oname);
         } catch( Exception ex) {
             log.error("Error registering " + oname, ex );

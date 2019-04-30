@@ -538,11 +538,8 @@ public class Catalina {
             }
             if (inputStream == null) {
                 try {
-                    inputStream = getClass().getClassLoader()
-                            .getResourceAsStream(getConfigFile());
-                    inputSource = new InputSource
-                            (getClass().getClassLoader()
-                                    .getResource(getConfigFile()).toString());
+                    inputStream = getClass().getClassLoader().getResourceAsStream(getConfigFile());
+                    inputSource = new InputSource(getClass().getClassLoader().getResource(getConfigFile()).toString());
                 } catch (Exception e) {
                     if (log.isDebugEnabled()) {
                         log.debug(sm.getString("catalina.configFail",
@@ -661,6 +658,7 @@ public class Catalina {
 
         // Start the new server
         try {
+            // Bootstrap 调用了 Catalina 的 start 方法，该方法也同样执行了 Server 的 start 方法 >> LifecycleBase.start()
             getServer().start();
         } catch (LifecycleException e) {
             log.fatal(sm.getString("catalina.serverStartFail"), e);

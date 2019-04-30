@@ -545,7 +545,7 @@ public final class Bootstrap {
                 if (null == daemon.getServer()) {
                     System.exit(1);
                 }
-            } else if (command.equals("stop")) {
+            } else if (command.equals("stop")) {  // 关闭
                 daemon.stopServer(args);
             } else if (command.equals("configtest")) {
                 daemon.load(args);

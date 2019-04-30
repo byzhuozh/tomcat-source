@@ -452,6 +452,11 @@ public class Catalina {
         }
 
         Server s = getServer();
+
+        /**
+         * 该停止命令的虚拟机和启动的虚拟机不是一个虚拟机，因此，没有初始化 Server , 进入 IF 块，
+         * 解析 server.xml 文件，获取文件中端口，用以创建Socket
+         */
         if (s == null) {
             // Create and execute our Digester
             Digester digester = createStopDigester();
@@ -484,6 +489,8 @@ public class Catalina {
                  OutputStream stream = socket.getOutputStream()) {
                 String shutdown = s.getShutdown();
                 for (int i = 0; i < shutdown.length(); i++) {
+                    // 向启动服务器发送 SHUTDOWN 命令，关闭启动服务器，启动服务器退出刚刚的循环，执行后面的 stop 方法，最后退出虚拟机
+                    // 和 start() 方法中的 await() 方法对应， await 方法创建了一个 ServerSocket 和当前的 Socket 进行通信
                     stream.write(shutdown.charAt(i));
                 }
                 stream.flush();
@@ -505,6 +512,8 @@ public class Catalina {
 
     /**
      * Start a new server instance.
+     * <p>
+     * 主要逻辑是解析server.xml文件，初始化容器
      */
     public void load() {
 
@@ -676,10 +685,18 @@ public class Catalina {
         }
 
         // Register shutdown hook
+        /**
+         * 注册新的虚拟机来关闭钩子。
+         * 只是一个已初始化但尚未启动的线程。虚拟机开始启用其关闭序列时，它会以某种未指定的顺序启动所有已注册的关闭钩子，
+         * 并让它们同时运行。运行完所有的钩子后，如果已启用退出终结，那么虚拟机接着会运行所有未调用的终结方法。最后，虚拟机会暂停。
+         * 注意，关闭序列期间会继续运行守护线程，如果通过调用方法来发起关闭序列，那么也会继续运行非守护线程。
+         */
         if (useShutdownHook) {
             if (shutdownHook == null) {
                 shutdownHook = new CatalinaShutdownHook();
             }
+            // 添加钩子
+            // 关闭钩子的逻辑，其实就是开辟一个守护线程交给虚拟机，然后虚拟机在某些异常情况（比如System.exit(0)）前执行停止容器的逻辑
             Runtime.getRuntime().addShutdownHook(shutdownHook);
 
             // If JULI is being used, disable JULI's shutdown hook since
@@ -693,7 +710,9 @@ public class Catalina {
         }
 
         if (await) {
+            //创建一个socketServer 链接，然后循环等待消息。如果发过来的消息为字符串SHUTDOWN, 那么就break，停止循环，关闭socket。否则永不停歇
             await();
+            // 如果tomcat 在 await 方法中的 severSocket 不接受 SHUTDOWN 的消息，则不会执行到 stop
             stop();
         }
     }
@@ -706,6 +725,7 @@ public class Catalina {
         try {
             // Remove the ShutdownHook first so that server.stop()
             // doesn't get invoked twice
+            // 该方法首先移除关闭钩子，为什么要移除呢，因为他的任务已经完成了
             if (useShutdownHook) {
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
 
@@ -731,6 +751,11 @@ public class Catalina {
                     && LifecycleState.DESTROYED.compareTo(state) >= 0) {
                 // Nothing to do. stop() was already called
             } else {
+
+                /**
+                 * Server的stop方法基本和init方法和start方法一样，都是使用父类的模板方法，
+                 * 首先出发事件，然后调用stopInternal，该方法内部循环停止子容器，子容器递归停止
+                 */
                 s.stop();
                 s.destroy();
             }
@@ -820,6 +845,8 @@ public class Catalina {
 
     /**
      * Shutdown hook which will perform a clean shutdown of Catalina if needed.
+     * <p>
+     * Catalina的内部类，方法逻辑是，如果Server容器还存在，就是执行Catalina的stop方法用于停止容器
      */
     protected class CatalinaShutdownHook extends Thread {
 
@@ -827,6 +854,7 @@ public class Catalina {
         public void run() {
             try {
                 if (getServer() != null) {
+                    // 为什么要用Catalina.this.stop 呢？因为它继承了Thread，而Thread也有一个stop方法，因此需要显式的指定该方法
                     Catalina.this.stop();
                 }
             } catch (Throwable ex) {
@@ -837,6 +865,7 @@ public class Catalina {
                 // so log messages aren't lost
                 LogManager logManager = LogManager.getLogManager();
                 if (logManager instanceof ClassLoaderLogManager) {
+                    // 关闭日志管理器
                     ((ClassLoaderLogManager) logManager).shutdown();
                 }
             }

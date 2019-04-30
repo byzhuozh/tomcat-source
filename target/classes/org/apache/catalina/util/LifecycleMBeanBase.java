@@ -17,12 +17,6 @@
 
 package org.apache.catalina.util;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.apache.catalina.Globals;
 import org.apache.catalina.JmxEnabled;
 import org.apache.catalina.LifecycleException;
@@ -31,24 +25,26 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.res.StringManager;
 
+import javax.management.*;
+
 public abstract class LifecycleMBeanBase extends LifecycleBase
         implements JmxEnabled {
 
     private static final Log log = LogFactory.getLog(LifecycleMBeanBase.class);
 
     private static final StringManager sm =
-        StringManager.getManager("org.apache.catalina.util");
-
-
+            StringManager.getManager("org.apache.catalina.util");
+    protected MBeanServer mserver = null;
     /* Cache components of the MBean registration. */
     private String domain = null;
     private ObjectName oname = null;
-    protected MBeanServer mserver = null;
 
     /**
      * Sub-classes wishing to perform additional initialization should override
      * this method, ensuring that super.initInternal() is the first call in the
      * overriding method.
+     * <p>
+     * 此 initInternal方法用于将容器托管到JMX，便于运维管理
      */
     @Override
     protected void initInternal() throws LifecycleException {
@@ -58,6 +54,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
         if (oname == null) {
             mserver = Registry.getRegistry(null, null).getMBeanServer();
 
+            // 将容器注册到 MBeanServer
             oname = register(this, getObjectNameKeyProperties());
         }
     }
@@ -72,18 +69,6 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
     protected void destroyInternal() throws LifecycleException {
         unregister(oname);
     }
-
-
-    /**
-     * Specify the domain under which this component should be registered. Used
-     * with components that cannot (easily) navigate the component hierarchy to
-     * determine the correct domain to use.
-     */
-    @Override
-    public final void setDomain(String domain) {
-        this.domain = domain;
-    }
-
 
     /**
      * Obtain the domain under which this component will be / has been
@@ -102,12 +87,21 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
         return domain;
     }
 
+    /**
+     * Specify the domain under which this component should be registered. Used
+     * with components that cannot (easily) navigate the component hierarchy to
+     * determine the correct domain to use.
+     */
+    @Override
+    public final void setDomain(String domain) {
+        this.domain = domain;
+    }
 
     /**
      * Method implemented by sub-classes to identify the domain in which MBeans
      * should be registered.
      *
-     * @return  The name of the domain to use to register MBeans.
+     * @return The name of the domain to use to register MBeans.
      */
     protected abstract String getDomainInternal();
 
@@ -125,8 +119,8 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
      * Allow sub-classes to specify the key properties component of the
      * {@link ObjectName} that will be used to register this component.
      *
-     * @return  The string representation of the key properties component of the
-     *          desired {@link ObjectName}
+     * @return The string representation of the key properties component of the
+     * desired {@link ObjectName}
      */
     protected abstract String getObjectNameKeyProperties();
 
@@ -138,15 +132,14 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
      * Note: This method should only be used once {@link #initInternal()} has
      * been called and before {@link #destroyInternal()} has been called.
      *
-     * @param obj                       The object the register
-     * @param objectNameKeyProperties   The key properties component of the
-     *                                  object name to use to register the
-     *                                  object
-     *
-     * @return  The name used to register the object
+     * @param obj                     The object the register
+     * @param objectNameKeyProperties The key properties component of the
+     *                                object name to use to register the
+     *                                object
+     * @return The name used to register the object
      */
     protected final ObjectName register(Object obj,
-            String objectNameKeyProperties) {
+                                        String objectNameKeyProperties) {
 
         // Construct an object name with the right domain
         StringBuilder name = new StringBuilder(getDomain());
@@ -158,6 +151,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
         try {
             on = new ObjectName(name.toString());
 
+            // 核心实现：registerComponent
             Registry.getRegistry(null, null).registerComponent(obj, on, null);
         } catch (MalformedObjectNameException e) {
             log.warn(sm.getString("lifecycleMBeanBase.registerFail", obj, name),
@@ -178,7 +172,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
      * Note: This method should only be used once {@link #initInternal()} has
      * been called and before {@link #destroyInternal()} has been called.
      *
-     * @param on    The name of the component to unregister
+     * @param on The name of the component to unregister
      */
     protected final void unregister(ObjectName on) {
 

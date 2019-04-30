@@ -16,30 +16,7 @@
  */
 package org.apache.catalina.core;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessControlException;
-import java.util.Random;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.ObjectName;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleState;
-import org.apache.catalina.Server;
-import org.apache.catalina.Service;
+import org.apache.catalina.*;
 import org.apache.catalina.deploy.NamingResourcesImpl;
 import org.apache.catalina.mbeans.MBeanFactory;
 import org.apache.catalina.startup.Catalina;
@@ -51,6 +28,18 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.buf.StringCache;
 import org.apache.tomcat.util.res.StringManager;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.ObjectName;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.*;
+import java.security.AccessControlException;
+import java.util.Random;
 
 
 /**
@@ -437,6 +426,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
 
         // Set up a server socket to wait on
         try {
+            //创建一个socketServer 链接(端口默认 8005)，然后循环等待消息
             awaitSocket = new ServerSocket(port, 1,
                     InetAddress.getByName(address));
         } catch (IOException e) {
@@ -451,6 +441,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
 
             // Loop waiting for a connection and a valid command
             while (!stopAwait) {
+                //创建一个socketServer 链接，然后循环等待消息
                 ServerSocket serverSocket = awaitSocket;
                 if (serverSocket == null) {
                     break;
@@ -519,6 +510,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
                 }
 
                 // Match against our command string
+                // 如果发过来的消息为字符串SHUTDOWN, 那么就break，停止循环，关闭socket
                 boolean match = command.toString().equals(shutdown);
                 if (match) {
                     log.info(sm.getString("standardServer.shutdownViaPort"));
@@ -535,6 +527,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
             // Close the server socket and return
             if (serverSocket != null) {
                 try {
+                    // 关闭
                     serverSocket.close();
                 } catch (IOException e) {
                     // Ignore
@@ -782,7 +775,10 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
     @Override
     protected void startInternal() throws LifecycleException {
 
+        //给监听器推送监听事件
         fireLifecycleEvent(CONFIGURE_START_EVENT, null);
+
+        //将自身状态更改为LifecycleState.STARTING（启动中）
         setState(LifecycleState.STARTING);
 
         globalNamingResources.start();
@@ -790,7 +786,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         // Start our defined Services
         synchronized (servicesLock) {
             for (int i = 0; i < services.length; i++) {
-                services[i].start();
+                services[i].start();    // 启动所有子容器
             }
         }
     }
@@ -825,7 +821,8 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
      */
     @Override
     protected void initInternal() throws LifecycleException {
-
+        // 调用父类 LifecycleMBeanBase.initInternal()
+        // 此 initInternal方法用于将容器托管到JMX，便于运维管理
         super.initInternal();
 
         // Register global String cache
@@ -871,6 +868,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
             }
         }
         // Initialize our defined Services
+        // 启动子容器的 init 方法
         for (int i = 0; i < services.length; i++) {
             services[i].init();
         }

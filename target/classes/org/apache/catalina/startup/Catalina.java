@@ -460,7 +460,7 @@ public class Catalina {
         if (s == null) {
             // Create and execute our Digester
             Digester digester = createStopDigester();
-            File file = configFile();
+            File file = configFile();   // 获取 server.xml 文件
             try (FileInputStream fis = new FileInputStream(file)) {
                 InputSource is =
                         new InputSource(file.toURI().toURL().toString());
@@ -537,6 +537,7 @@ public class Catalina {
         File file = null;
         try {
             try {
+                // 加载 serve.xml 文件
                 file = configFile();
                 inputStream = new FileInputStream(file);
                 inputSource = new InputSource(file.toURI().toURL().toString());

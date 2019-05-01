@@ -528,8 +528,10 @@ public class StandardService extends LifecycleMBeanBase implements Service {
     @Override
     protected void initInternal() throws LifecycleException {
 
+        // 将容器托管到JMX，便于运维管理
         super.initInternal();
 
+        // 执行引擎初始化
         if (engine != null) {
             engine.init();
         }
@@ -546,6 +548,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         mapperListener.init();
 
         // Initialize our defined Connectors
+        // 初始化连接器
         synchronized (connectorsLock) {
             for (Connector connector : connectors) {
                 try {

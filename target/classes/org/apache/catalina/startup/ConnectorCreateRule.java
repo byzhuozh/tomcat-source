@@ -52,11 +52,13 @@ public class ConnectorCreateRule extends Rule {
      * @param name the local name if the parser is namespace aware, or just
      *   the element name otherwise
      * @param attributes The attribute list for this element
+     *
+     * List中取出一个Service，然后会分别创建2个连接器，一个是HTTP， 一个是AJP
      */
     @Override
     public void begin(String namespace, String name, Attributes attributes)
             throws Exception {
-        Service svc = (Service)digester.peek();
+        Service svc = (Service)digester.peek(); // List中取出一个Service
         Executor ex = null;
         if ( attributes.getValue("executor")!=null ) {
             ex = svc.getExecutor(attributes.getValue("executor"));
@@ -69,6 +71,8 @@ public class ConnectorCreateRule extends Rule {
         if (sslImplementationName != null) {
             setSSLImplementationName(con, sslImplementationName);
         }
+
+        //根据 xml 文档解析生成的对象 push 到栈中
         digester.push(con);
     }
 

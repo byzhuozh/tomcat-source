@@ -37,6 +37,7 @@ import org.apache.coyote.Adapter;
 import org.apache.coyote.ProtocolHandler;
 import org.apache.coyote.UpgradeProtocol;
 import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
+import org.apache.coyote.http11.Http11Protocol;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.IntrospectionUtils;
@@ -71,10 +72,11 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
     public Connector(String protocol) {
-        setProtocol(protocol);
+        setProtocol(protocol);  //符串设置协议处理器类名  HTTP 或 AJP
         // Instantiate protocol handler
         ProtocolHandler p = null;
         try {
+            // 根据刚刚设置好的 protocolHandlerClassName 反射创建 ProtocolHandler 类型的对象
             Class<?> clazz = Class.forName(protocolHandlerClassName);
             p = (ProtocolHandler) clazz.getConstructor().newInstance();
         } catch (Exception e) {
@@ -963,13 +965,17 @@ public class Connector extends LifecycleMBeanBase  {
     @Override
     protected void initInternal() throws LifecycleException {
 
+        // 注册到JMX中, 同 server、service 一样
         super.initInternal();
 
         // Initialize adapter
+        // 初始化一个适配器
         adapter = new CoyoteAdapter(this);
+        // 设置 Http11Protocol 的适配器为刚刚创建的 CoyoteAdapter 适配器
         protocolHandler.setAdapter(adapter);
 
         // Make sure parseBodyMethodsSet has a default
+        // 设置解析请求的请求方法类型，默认是 POST
         if (null == parseBodyMethodsSet) {
             setParseBodyMethods(getParseBodyMethods());
         }
@@ -990,7 +996,9 @@ public class Connector extends LifecycleMBeanBase  {
         }
 
         try {
+            // 初始化 Http11Protocol
             protocolHandler.init();
+
         } catch (Exception e) {
             throw new LifecycleException(
                     sm.getString("coyoteConnector.protocolHandlerInitializationFailed"), e);
@@ -1012,9 +1020,11 @@ public class Connector extends LifecycleMBeanBase  {
                     "coyoteConnector.invalidPort", Integer.valueOf(getPort())));
         }
 
+        // 设置启动中状态。状态更新会触发事件监听机制
         setState(LifecycleState.STARTING);
 
         try {
+            // Http11Protocol 的 srart 方法
             protocolHandler.start();
         } catch (Exception e) {
             throw new LifecycleException(

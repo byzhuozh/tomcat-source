@@ -59,6 +59,11 @@ public class NioSelectorPool {
     protected ConcurrentLinkedQueue<Selector> selectors =
             new ConcurrentLinkedQueue<>();
 
+    /**
+     * 获取选择器
+     * @return
+     * @throws IOException
+     */
     protected Selector getSharedSelector() throws IOException {
         if (SHARED && SHARED_SELECTOR == null) {
             synchronized ( NioSelectorPool.class ) {
@@ -130,7 +135,7 @@ public class NioSelectorPool {
         getSharedSelector();
         if (SHARED) {
             blockingSelector = new NioBlockingSelector();
-            blockingSelector.open(getSharedSelector());
+            blockingSelector.open(getSharedSelector());  // 初始化 NioBlockingSelector， 并置入选择器（Java 原生）
         }
 
     }

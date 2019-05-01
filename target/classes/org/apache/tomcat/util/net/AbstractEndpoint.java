@@ -416,6 +416,10 @@ public abstract class AbstractEndpoint<S> {
 
     /**
      * Acceptor thread count.
+     *
+     * Acceptor线程只负责从队列中取出已经建立连接的请求。在启动的时候使用一个ServerSocketChannel监听一个连接端口如8080，
+     * 可以有多个Acceptor线程并发不断调用上述ServerSocketChannel的accept方法来获取新的连接。
+     * 参数acceptorThreadCount其实使用的Acceptor线程的个数
      */
     protected int acceptorThreadCount = 1;
 
@@ -435,7 +439,9 @@ public abstract class AbstractEndpoint<S> {
     public int getAcceptorThreadPriority() { return acceptorThreadPriority; }
 
 
+    //默认最大连接数
     private int maxConnections = 10000;
+
     public void setMaxConnections(int maxCon) {
         this.maxConnections = maxCon;
         LimitLatch latch = this.connectionLimitLatch;
@@ -534,6 +540,10 @@ public abstract class AbstractEndpoint<S> {
      * Allows the server developer to specify the acceptCount (backlog) that
      * should be used for server sockets. By default, this value
      * is 100.
+     *
+     * 连接在被ServerSocketChannel accept之前就暂存在这个队列中，acceptCount就是这个队列的最大长度。
+     * ServerSocketChannel accept就是从这个队列中不断取出已经建立连接的的请求。
+     * 所以当ServerSocketChannel accept取出不及时就有可能造成该队列积压，一旦满了连接就被拒绝了
      */
     private int acceptCount = 100;
     public void setAcceptCount(int acceptCount) { if (acceptCount > 0) this.acceptCount = acceptCount; }
@@ -652,6 +662,8 @@ public abstract class AbstractEndpoint<S> {
 
     /**
      * Maximum amount of worker threads.
+     *
+     * worker的线程
      */
     private int maxThreads = 200;
     public void setMaxThreads(int maxThreads) {
@@ -876,8 +888,12 @@ public abstract class AbstractEndpoint<S> {
     }
 
 
+    /**
+     * 线程池的初始化，核心线程数 10， 最大线程数200
+     */
     public void createExecutor() {
         internalExecutor = true;
+        // LinkedBlockingQueue 最大容量就是Integer.MAX_VALUE
         TaskQueue taskqueue = new TaskQueue();
         TaskThreadFactory tf = new TaskThreadFactory(getName() + "-exec-", daemon, getThreadPriority());
         executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);
@@ -1049,6 +1065,8 @@ public abstract class AbstractEndpoint<S> {
      *                          container thread
      *
      * @return if processing was triggered successfully
+     *
+     * 将Selector监听到的IO读写事件封装成SocketProcessor，交给线程池执行
      */
     public boolean processSocket(SocketWrapperBase<S> socketWrapper,
             SocketEvent event, boolean dispatch) {
@@ -1056,12 +1074,16 @@ public abstract class AbstractEndpoint<S> {
             if (socketWrapper == null) {
                 return false;
             }
+
+            //复用 SocketProcessorBase，将事件重新封装
             SocketProcessorBase<S> sc = processorCache.pop();
             if (sc == null) {
                 sc = createSocketProcessor(socketWrapper, event);
             } else {
                 sc.reset(socketWrapper, event);
             }
+
+            //获取事件处理的线程池（核心数10， 最大线程数200，Linked）
             Executor executor = getExecutor();
             if (dispatch && executor != null) {
                 executor.execute(sc);
@@ -1178,11 +1200,15 @@ public abstract class AbstractEndpoint<S> {
             bind();
             bindState = BindState.BOUND_ON_START;
         }
+        // 模板模式，调用子类的 startInternal 实现方法
         startInternal();
     }
 
+    /**
+     * 获取指定的Acceptor数量的线程 (默认是 1)
+     */
     protected final void startAcceptorThreads() {
-        int count = getAcceptorThreadCount();
+        int count = getAcceptorThreadCount(); // 默认是 1
         acceptors = new Acceptor[count];
 
         for (int i = 0; i < count; i++) {
@@ -1190,7 +1216,7 @@ public abstract class AbstractEndpoint<S> {
             String threadName = getName() + "-Acceptor-" + i;
             acceptors[i].setThreadName(threadName);
             Thread t = new Thread(acceptors[i], threadName);
-            t.setPriority(getAcceptorThreadPriority());
+            t.setPriority(getAcceptorThreadPriority());   // 优先级默认 5
             t.setDaemon(getDaemon());
             t.start();
         }
@@ -1249,6 +1275,10 @@ public abstract class AbstractEndpoint<S> {
 
     protected abstract Log getLog();
 
+    /**
+     * 初始化最大连接数的限制器 LimitLatch
+     * @return
+     */
     protected LimitLatch initializeConnectionLatch() {
         if (maxConnections==-1) return null;
         if (connectionLimitLatch==null) {
@@ -1263,6 +1293,10 @@ public abstract class AbstractEndpoint<S> {
         connectionLimitLatch = null;
     }
 
+    /**
+     * 设置maxConnections=-1的时候就表示不用限制最大连接数,
+     * 默认是限制10000,如果不限制则一旦出现大的冲击，则tomcat很有可能直接挂掉，导致服务停止
+     */
     protected void countUpOrAwaitConnection() throws InterruptedException {
         if (maxConnections==-1) return;
         LimitLatch latch = connectionLimitLatch;

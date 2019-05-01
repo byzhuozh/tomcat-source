@@ -27,6 +27,8 @@ import org.apache.tomcat.util.net.NioEndpoint;
  * Processor is single threaded and specific to stream-based protocols,
  * will not fit Jk protocols like JNI.
  *
+ * 抽象协议的实现，包括线程等。处理器是单线程的，特定于基于流的协议，不适合像JNI那样的Jk协议。
+ *
  * @author Remy Maucherat
  * @author Costin Manolache
  */

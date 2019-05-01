@@ -64,6 +64,9 @@ public class TaskQueue extends LinkedBlockingQueue<Runnable> {
         return super.offer(o,timeout,unit); //forces the item onto the queue, to be used if the task is rejected
     }
 
+    /**
+     * 当线程数小于最大线程数的时候就直接返回false即入队列失败，则迫使ThreadPoolExecutor创建出新的非核心线程
+     */
     @Override
     public boolean offer(Runnable o) {
       //we can't do any checks
@@ -73,7 +76,7 @@ public class TaskQueue extends LinkedBlockingQueue<Runnable> {
         //we have idle threads, just add it to the queue
         if (parent.getSubmittedCount()<=(parent.getPoolSize())) return super.offer(o);
         //if we have less threads than maximum force creation of a new thread
-        if (parent.getPoolSize()<parent.getMaximumPoolSize()) return false;
+        if (parent.getPoolSize()<parent.getMaximumPoolSize()) return false;  // 不入队列，直接返回false,直接俄创建线程
         //if we reached here, we need to add it to the queue
         return super.offer(o);
     }

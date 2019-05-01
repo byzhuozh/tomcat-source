@@ -100,7 +100,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
     public AbstractProtocol(AbstractEndpoint<S> endpoint) {
         this.endpoint = endpoint;
         setSoLinger(Constants.DEFAULT_CONNECTION_LINGER);
-        setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
+        setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);  // tcp 链接不延迟
     }
 
 
@@ -560,6 +560,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             getLog().info(sm.getString("abstractProtocolHandler.init", getName()));
         }
 
+        // 将 endpoint 注册到JMX中
         if (oname == null) {
             // Component not pre-registered so register it
             oname = createObjectName();
@@ -568,16 +569,19 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             }
         }
 
+        // 将 Http11ConnectionHandler（Http11Protocol 的 内部类）注册到JMX中
         if (this.domain != null) {
             rgOname = new ObjectName(domain + ":type=GlobalRequestProcessor,name=" + getName());
             Registry.getRegistry(null, null).registerComponent(
                     getHandler().getGlobal(), rgOname, null);
         }
 
+        // 设置 endpoint 的名字，Http 连接器是 http-nio-8080
         String endpointName = getName();
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
         endpoint.setDomain(domain);
 
+        // endpoint 初始化
         endpoint.init();
     }
 
@@ -588,6 +592,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             getLog().info(sm.getString("abstractProtocolHandler.start", getName()));
         }
 
+        // 启动
         endpoint.start();
 
         // Start async timeout thread
@@ -598,7 +603,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             priority = Thread.NORM_PRIORITY;
         }
         timeoutThread.setPriority(priority);
-        timeoutThread.setDaemon(true);
+        timeoutThread.setDaemon(true);  // 设置守护线程
         timeoutThread.start();
     }
 

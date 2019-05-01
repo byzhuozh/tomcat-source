@@ -1158,6 +1158,8 @@ public class Digester extends DefaultHandler2 {
     /**
      * Process notification of the beginning of the document being reached.
      *
+     * 处理文档
+     *
      * @exception SAXException if a parsing error is to be reported
      */
     @SuppressWarnings("deprecation")
@@ -1202,6 +1204,8 @@ public class Digester extends DefaultHandler2 {
      * @param list The attributes attached to the element. If there are
      *   no attributes, it shall be an empty Attributes object.
      * @exception SAXException if a parsing error is to be reported
+     *
+     * 解析 xml 文档中的元素
      */
     @Override
     public void startElement(String namespaceURI, String localName, String qName, Attributes list)
@@ -1247,6 +1251,7 @@ public class Digester extends DefaultHandler2 {
                     if (debug) {
                         log.debug("  Fire begin() for " + rule);
                     }
+                    //规则解析
                     rule.begin(namespaceURI, name, list);
                 } catch (Exception e) {
                     log.error("Begin event threw exception", e);

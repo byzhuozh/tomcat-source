@@ -537,6 +537,7 @@ public class Catalina {
         File file = null;
         try {
             try {
+                // 加载 serve.xml 文件
                 file = configFile();
                 inputStream = new FileInputStream(file);
                 inputSource = new InputSource(file.toURI().toURL().toString());

@@ -300,7 +300,7 @@ public class CoyoteAdapter implements Adapter {
     public void service(org.apache.coyote.Request req, org.apache.coyote.Response res)
             throws Exception {
 
-        Request request = (Request) req.getNote(ADAPTER_NOTES);
+        Request request = (Request) req.getNote(ADAPTER_NOTES);   // 实现了 servlet 标准的 Request
         Response response = (Response) res.getNote(ADAPTER_NOTES);
 
         if (request == null) {
@@ -311,7 +311,7 @@ public class CoyoteAdapter implements Adapter {
             response.setCoyoteResponse(res);
 
             // Link objects
-            request.setResponse(response);
+            request.setResponse(response);  // 互相关联
             response.setRequest(request);
 
             // Set as notes
@@ -319,10 +319,10 @@ public class CoyoteAdapter implements Adapter {
             res.setNote(ADAPTER_NOTES, response);
 
             // Set query string encoding
-            req.getParameters().setQueryStringCharset(connector.getURICharset());
+            req.getParameters().setQueryStringCharset(connector.getURICharset());   // 解析 uri
         }
 
-        if (connector.getXpoweredBy()) {
+        if (connector.getXpoweredBy()) {    // 网站安全狗IIS
             response.addHeader("X-Powered-By", POWERED_BY);
         }
 
@@ -332,16 +332,23 @@ public class CoyoteAdapter implements Adapter {
         req.getRequestProcessor().setWorkerThreadName(THREAD_NAME.get());
 
         try {
+
             // Parse and set Catalina and configuration specific
             // request parameters
+            // 解析请求内容
             postParseSuccess = postParseRequest(req, request, res, response);
+
             if (postParseSuccess) {
                 //check valves if we support async
+                // 检查是发支持异步
                 request.setAsyncSupported(
                         connector.getService().getContainer().getPipeline().isAsyncSupported());
+
                 // Calling the container
-                connector.getService().getContainer().getPipeline().getFirst().invoke(
-                        request, response);
+                // 调用 容器
+                // Tomcat 是由容器组成的，容器从大到小的排列依次是：Server-->Service---->Engine--->Host--->Context--->Wrapper，
+                // 那么当一个请求过来，从大容器到小容器，他们一个一个的传递
+                connector.getService().getContainer().getPipeline().getFirst().invoke(request, response);  // 一个复杂的调用
             }
             if (request.isAsync()) {
                 async = true;
@@ -570,6 +577,7 @@ public class CoyoteAdapter implements Adapter {
         // If the processor has set the scheme (AJP does this, HTTP does this if
         // SSL is enabled) use this to set the secure flag as well. If the
         // processor hasn't set it, use the settings from the connector
+        // 设置 请求的消息类型
         if (req.scheme().isNull()) {
             // Use connector scheme and secure configuration, (defaults to
             // "http" and false respectively)
@@ -582,8 +590,10 @@ public class CoyoteAdapter implements Adapter {
 
         // At this point the Host header has been processed.
         // Override if the proxyPort/proxyHost are set
+        // 设置代理名称和代理端口
         String proxyName = connector.getProxyName();
         int proxyPort = connector.getProxyPort();
+
         if (proxyPort != 0) {
             req.setServerPort(proxyPort);
         } else if (req.getServerPort() == -1) {
@@ -629,6 +639,7 @@ public class CoyoteAdapter implements Adapter {
             // Parse the path parameters. This will:
             //   - strip out the path parameters
             //   - convert the decodedURI to bytes
+            // 解析URL路径参数
             parsePathParameters(req, request);
 
             // URI decoding
@@ -668,6 +679,7 @@ public class CoyoteAdapter implements Adapter {
 
         // Request mapping.
         MessageBytes serverName;
+
         if (connector.getUseIPVHosts()) {
             serverName = req.localName();
             if (serverName.isNull()) {
@@ -692,9 +704,10 @@ public class CoyoteAdapter implements Adapter {
         }
 
         while (mapRequired) {
+
             // This will map the the latest version by default
-            connector.getService().getMapper().map(serverName, decodedURI,
-                    version, request.getMappingData());
+            // 从Connector 容器中的Mapper 中取出对应的 Context 和 Servlet, 设置 Request 的 WebApp应用和Servlet。如果Context不存在，则返回404。
+            connector.getService().getMapper().map(serverName, decodedURI, version, request.getMappingData());
 
             // If there is no context at this point, either this is a 404
             // because no ROOT context has been deployed or the URI was invalid
@@ -728,6 +741,7 @@ public class CoyoteAdapter implements Adapter {
             }
 
             // Look for session ID in cookies and SSL session
+            // 解析cookie，解析sessionId，设置 SessionId
             parseSessionCookiesId(request);
             parseSessionSslId(request);
 
@@ -810,6 +824,7 @@ public class CoyoteAdapter implements Adapter {
         }
 
         // Filter trace method
+        //判断方法类型是否是 TRACE 类型的方法，如果是，则返回405.不允许该方法进入服务器
         if (!connector.getAllowTrace()
                 && req.method().equalsIgnoreCase("TRACE")) {
             Wrapper wrapper = request.getWrapper();

@@ -739,6 +739,8 @@ public abstract class HttpServlet extends GenericServlet {
         } catch (ClassCastException e) {
             throw new ServletException("non-HTTP request or response");
         }
+
+        // servlet  执行请求
         service(request, response);
     }
 }

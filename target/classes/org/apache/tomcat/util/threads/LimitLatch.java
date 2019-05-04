@@ -27,6 +27,8 @@ import org.apache.juli.logging.LogFactory;
  * Shared latch that allows the latch to be acquired a limited number of times
  * after which all subsequent requests to acquire the latch will be placed in a
  * FIFO queue until one of the shares is returned.
+ *
+ * 类似 CountDownLatch 机制
  */
 public class LimitLatch {
 

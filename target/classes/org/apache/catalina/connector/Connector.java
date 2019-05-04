@@ -333,7 +333,7 @@ public class Connector extends LifecycleMBeanBase  {
     /**
      * @return the <code>Service</code> with which we are associated (if any).
      */
-    public Service getService() {
+    public Service  getService() {
         return this.service;
     }
 

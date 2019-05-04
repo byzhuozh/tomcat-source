@@ -666,8 +666,8 @@ public class Http11Processor extends AbstractProcessor {
 
         // Setting up the I/O
         setSocketWrapper(socketWrapper);
-        inputBuffer.init(socketWrapper);
-        outputBuffer.init(socketWrapper);
+        inputBuffer.init(socketWrapper);    // 设置输入流
+        outputBuffer.init(socketWrapper);   // 设置输出流
 
         // Flags
         keepAlive = true;
@@ -736,6 +736,7 @@ public class Http11Processor extends AbstractProcessor {
             }
 
             // Has an upgrade been requested?
+            // 判断请求头里边是否有 upgrade 指令
             Enumeration<String> connectionValues = request.getMimeHeaders().values("Connection");
             boolean foundUpgrade = false;
             while (connectionValues.hasMoreElements() && !foundUpgrade) {
@@ -743,6 +744,11 @@ public class Http11Processor extends AbstractProcessor {
                         Locale.ENGLISH).contains("upgrade");
             }
 
+            /**
+             * upgrade 指令：
+             *  用于让浏览器自动升级请求从http到https,用于大量包含http资源的http网页直接升级到https而不会报错.
+             *  简洁的来讲,就相当于在http和https之间起的一个过渡作用.
+             */
             if (foundUpgrade) {
                 // Check the protocol
                 String requestedProtocol = request.getHeader("Upgrade");
@@ -772,6 +778,7 @@ public class Http11Processor extends AbstractProcessor {
                 // Setting up filters, and parse some request headers
                 rp.setStage(org.apache.coyote.Constants.STAGE_PREPARE);
                 try {
+                    // 准备请求的内容
                     prepareRequest();
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -795,7 +802,10 @@ public class Http11Processor extends AbstractProcessor {
             if (getErrorState().isIoAllowed()) {
                 try {
                     rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
+
+                    // 真正处理的方法 CoyoteAdapter
                     getAdapter().service(request, response);
+
                     // Handle when the response was committed before a serious
                     // error occurred.  Throwing a ServletException should both
                     // set the status to 500 and set the errorException.

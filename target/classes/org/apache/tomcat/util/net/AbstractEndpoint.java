@@ -1078,18 +1078,21 @@ public abstract class AbstractEndpoint<S> {
             //复用 SocketProcessorBase，将事件重新封装
             SocketProcessorBase<S> sc = processorCache.pop();
             if (sc == null) {
+                // 如果缓存为空，则创建 SocketProcessor
                 sc = createSocketProcessor(socketWrapper, event);
             } else {
+                // 不为空，则进行重置，并覆盖
                 sc.reset(socketWrapper, event);
             }
 
-            //获取事件处理的线程池（核心数10， 最大线程数200，Linked）
+            //获取事件处理的线程池（核心数10， 最大线程数200，LinkedBlockingQueue 无界阻塞队列）
             Executor executor = getExecutor();
             if (dispatch && executor != null) {
                 executor.execute(sc);
             } else {
                 sc.run();
             }
+
         } catch (RejectedExecutionException ree) {
             getLog().warn(sm.getString("endpoint.executor.fail", socketWrapper) , ree);
             return false;

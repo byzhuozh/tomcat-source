@@ -47,16 +47,22 @@ public abstract class AbstractProcessorLight implements Processor {
             if (dispatches != null) {
                 DispatchType nextDispatch = dispatches.next();
                 state = dispatch(nextDispatch.getSocketStatus());
-            } else if (status == SocketEvent.DISCONNECT) {
+            } else if (status == SocketEvent.DISCONNECT) {      //未连接
                 // Do nothing here, just wait for it to get recycled
-            } else if (isAsync() || isUpgrade() || state == SocketState.ASYNC_END) {
+            } else if (isAsync()
+                    || isUpgrade()
+                    || state == SocketState.ASYNC_END) {     // 如果是异步的情况
+
                 state = dispatch(status);
+
                 if (state == SocketState.OPEN) {
                     // There may be pipe-lined data to read. If the data isn't
                     // processed now, execution will exit this loop and call
                     // release() which will recycle the processor (and input
                     // buffer) deleting any pipe-lined data. To avoid this,
                     // process it now.
+
+                    //数据处理
                     state = service(socketWrapper);
                 }
             } else if (status == SocketEvent.OPEN_WRITE) {

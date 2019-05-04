@@ -1540,14 +1540,18 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 } catch (CancelledKeyException ckx) {
                     handshake = -1;
                 }
+
                 if (handshake == 0) {
                     SocketState state = SocketState.OPEN;
                     // Process the request from this socket
                     if (event == null) {
+                        //getHandler 拿到协议处理器，执行数据处理
                         state = getHandler().process(socketWrapper, SocketEvent.OPEN_READ);
                     } else {
                         state = getHandler().process(socketWrapper, event);
                     }
+
+                    // 如果state等于SocketState.CLOSED，则关闭Socket
                     if (state == SocketState.CLOSED) {
                         close(socket, key);
                     }
@@ -1570,6 +1574,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 event = null;
                 //return to cache
                 if (running && !paused) {
+                    // 把 process 归还到 processorCache(LIFO的同步栈SynchronizedStack)栈中
                     processorCache.push(this);
                 }
             }

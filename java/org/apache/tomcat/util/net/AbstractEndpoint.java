@@ -1078,8 +1078,10 @@ public abstract class AbstractEndpoint<S> {
             //复用 SocketProcessorBase，将事件重新封装
             SocketProcessorBase<S> sc = processorCache.pop();
             if (sc == null) {
+                // 如果缓存为空，则创建 SocketProcessor
                 sc = createSocketProcessor(socketWrapper, event);
             } else {
+                // 不为空，则进行重置，并覆盖
                 sc.reset(socketWrapper, event);
             }
 

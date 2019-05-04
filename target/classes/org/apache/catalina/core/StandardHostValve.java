@@ -106,6 +106,7 @@ final class StandardHostValve extends ValveBase {
         throws IOException, ServletException {
 
         // Select the Context to be used for this Request
+        // 校验 Request 是否存在 Context
         Context context = request.getContext();
         if (context == null) {
             return;
@@ -134,6 +135,7 @@ final class StandardHostValve extends ValveBase {
             // application for processing.
             try {
                 if (!response.isErrorReportRequired()) {
+                    // StandardContextValve 调用连
                     context.getPipeline().getFirst().invoke(request, response);
                 }
             } catch (Throwable t) {

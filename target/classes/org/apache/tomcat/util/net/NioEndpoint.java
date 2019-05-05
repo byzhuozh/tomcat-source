@@ -419,7 +419,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 SocketBufferHandler bufhandler = new SocketBufferHandler(
                         socketProperties.getAppReadBufSize(),
                         socketProperties.getAppWriteBufSize(),
-                        socketProperties.getDirectBuffer());
+                        socketProperties.getDirectBuffer());  // 默认使用堆内存
                 if (isSSLEnabled()) {
                     channel = new SecureNioChannel(socket, bufhandler, selectorPool, this);
                 } else {
@@ -1255,7 +1255,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
         @Override
         public int read(boolean block, ByteBuffer to) throws IOException {
-            int nRead = populateReadBuffer(to);
+            int nRead = populateReadBuffer(to); // 读取的字节数
             if (nRead > 0) {
                 return nRead;
                 /*

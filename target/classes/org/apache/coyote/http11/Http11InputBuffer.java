@@ -16,11 +16,6 @@
  */
 package org.apache.coyote.http11;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
 import org.apache.coyote.InputBuffer;
 import org.apache.coyote.Request;
 import org.apache.juli.logging.Log;
@@ -32,6 +27,11 @@ import org.apache.tomcat.util.http.parser.HttpParser;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
 import org.apache.tomcat.util.net.SocketWrapperBase;
 import org.apache.tomcat.util.res.StringManager;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 /**
  * InputBuffer for HTTP that provides request header parsing as well as transfer
@@ -65,82 +65,70 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
 
 
     private final boolean rejectIllegalHeaderName;
-
-    /**
-     * State.
-     */
-    private boolean parsingHeader;
-
-
-    /**
-     * Swallow input ? (in the case of an expectation)
-     */
-    private boolean swallowInput;
-
-
-    /**
-     * The read buffer.
-     */
-    private ByteBuffer byteBuffer;
-
-
-    /**
-     * Pos of the end of the header in the buffer, which is also the
-     * start of the body.
-     */
-    private int end;
-
-
-    /**
-     * Wrapper that provides access to the underlying socket.
-     */
-    private SocketWrapperBase<?> wrapper;
-
-
-    /**
-     * Underlying input buffer.
-     */
-    private InputBuffer inputStreamInputBuffer;
-
-
-    /**
-     * Filter library.
-     * Note: Filter[Constants.CHUNKED_FILTER] is always the "chunked" filter.
-     */
-    private InputFilter[] filterLibrary;
-
-
-    /**
-     * Active filters (in order).
-     */
-    private InputFilter[] activeFilters;
-
-
-    /**
-     * Index of the last active filter.
-     */
-    private int lastActiveFilter;
-
-
-    /**
-     * Parsing state - used for non blocking parsing so that
-     * when more data arrives, we can pick up where we left off.
-     */
-    private boolean parsingRequestLine;
-    private int parsingRequestLinePhase = 0;
-    private boolean parsingRequestLineEol = false;
-    private int parsingRequestLineStart = 0;
-    private int parsingRequestLineQPos = -1;
-    private HeaderParsePosition headerParsePos;
     private final HeaderParseData headerData = new HeaderParseData();
     private final HttpParser httpParser;
-
     /**
      * Maximum allowed size of the HTTP request line plus headers plus any
      * leading blank lines.
      */
     private final int headerBufferSize;
+    /**
+     * State.
+     */
+    private boolean parsingHeader;
+    /**
+     * Swallow input ? (in the case of an expectation)
+     */
+    private boolean swallowInput;
+    /**
+     * The read buffer.
+     */
+    private ByteBuffer byteBuffer;
+    /**
+     * Pos of the end of the header in the buffer, which is also the
+     * start of the body.
+     */
+    private int end;
+    /**
+     * Wrapper that provides access to the underlying socket.
+     */
+    private SocketWrapperBase<?> wrapper;
+    /**
+     * Underlying input buffer.
+     */
+    private InputBuffer inputStreamInputBuffer;
+    /**
+     * Filter library.
+     * Note: Filter[Constants.CHUNKED_FILTER] is always the "chunked" filter.
+     */
+    private InputFilter[] filterLibrary;
+    /**
+     * Active filters (in order).
+     */
+    private InputFilter[] activeFilters;
+    /**
+     * Index of the last active filter.
+     */
+    private int lastActiveFilter;
+    /**
+     * Parsing state - used for non blocking parsing so that
+     * when more data arrives, we can pick up where we left off.
+     */
+    private boolean parsingRequestLine;
 
+    /**
+     * 0: 表示解析开始前跳过空行
+     * 2: 开始解析请求方法
+     * 3: 跳过请求方法和请求uri之间的空格或制表符(空白符)
+     * 4: 开始解析请求URI     eg: http://localhost:8080/test?name=zhuozh
+     * 5: 与3相同（空白字符）
+     * 6: 解析协议版本，如 HTTP/1.1
+     */
+    private int parsingRequestLinePhase = 0;
+    private boolean parsingRequestLineEol = false;
+    private int parsingRequestLineStart = 0;
+    private int parsingRequestLineQPos = -1;
+    private HeaderParsePosition headerParsePos;
     /**
      * Known size of the NioChannel read buffer.
      */
@@ -149,12 +137,12 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
 
     // ----------------------------------------------------------- Constructors
 
-    public Http11InputBuffer(Request request, int headerBufferSize,
-            boolean rejectIllegalHeaderName, HttpParser httpParser) {
+    public Http11InputBuffer(Request request, int headerBufferSize, boolean rejectIllegalHeaderName, HttpParser httpParser) {
 
         this.request = request;
         headers = request.getMimeHeaders();
 
+        // 指定了headerBufferSize 的大小，还有个inputStreamInputBuffer，inputStreamInputBuffer 是在读http body时用到的
         this.headerBufferSize = headerBufferSize;
         this.rejectIllegalHeaderName = rejectIllegalHeaderName;
         this.httpParser = httpParser;
@@ -241,7 +229,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
 
     /**
      * @deprecated Unused. Will be removed in Tomcat 9. Use
-     *             {@link #doRead(ApplicationBufferHandler)}
+     * {@link #doRead(ApplicationBufferHandler)}
      */
     @Deprecated
     @Override
@@ -339,11 +327,11 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
      * HTTP request header parsing. Do NOT attempt to read the request body
      * using it.
      *
-     * @throws IOException If an exception occurs during the underlying socket
-     * read operations, or if the given buffer is not big enough to accommodate
-     * the whole line.
      * @return true if data is properly fed; false if no data is available
      * immediately and thread should be freed
+     * @throws IOException If an exception occurs during the underlying socket
+     *                     read operations, or if the given buffer is not big enough to accommodate
+     *                     the whole line.
      */
     boolean parseRequestLine(boolean keptAlive) throws IOException {
 
@@ -352,12 +340,11 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
             return true;
         }
         //
-        // Skipping blank lines
+        // Skipping blank lines     跳过空行
         //
         if (parsingRequestLinePhase < 2) {
             byte chr = 0;
             do {
-
                 // Read new bytes if needed
                 if (byteBuffer.position() >= byteBuffer.limit()) {
                     if (keptAlive) {
@@ -374,6 +361,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                     // Switch to the socket timeout.
                     wrapper.setReadTimeout(wrapper.getEndpoint().getConnectionTimeout());
                 }
+                
                 if (!keptAlive && byteBuffer.position() == 0 && byteBuffer.limit() >= CLIENT_PREFACE_START.length - 1) {
                     boolean prefaceMatch = true;
                     for (int i = 0; i < CLIENT_PREFACE_START.length && prefaceMatch; i++) {
@@ -403,9 +391,10 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                         + new String(byteBuffer.array(), byteBuffer.position(), byteBuffer.remaining(), StandardCharsets.ISO_8859_1) + "]");
             }
         }
+
         if (parsingRequestLinePhase == 2) {
             //
-            // Reading the method name
+            // Reading the method name    读取请求方法名称， POST/GET
             // Method name is a token
             //
             boolean space = false;
@@ -421,6 +410,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                 byte chr = byteBuffer.get();
                 if (chr == Constants.SP || chr == Constants.HT) {
                     space = true;
+                    //读到了空格，说明知道了method的长度。即pos - parsingRequestLineStart，这时就可以设置request的method了。
                     request.method().setBytes(byteBuffer.array(), parsingRequestLineStart,
                             pos - parsingRequestLineStart);
                 } else if (!HttpParser.isToken(chr)) {
@@ -430,8 +420,10 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                     throw new IllegalArgumentException(sm.getString("iib.invalidmethod"));
                 }
             }
-            parsingRequestLinePhase = 3;
+            parsingRequestLinePhase = 3;    //状态变更
         }
+
+        //  跳过请求方法和请求uri之间的空格或制表符(空白符)
         if (parsingRequestLinePhase == 3) {
             // Spec says single SP but also be tolerant of multiple SP and/or HT
             boolean space = true;
@@ -447,15 +439,18 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                     byteBuffer.position(byteBuffer.position() - 1);
                 }
             }
+            //跳过空格，让 parsingRequestLineStart 到 url的第一个偏移位置
             parsingRequestLineStart = byteBuffer.position();
             parsingRequestLinePhase = 4;
         }
+
+        // 开始解析请求URI     eg: http://localhost:8080/test?name=zhuozh
         if (parsingRequestLinePhase == 4) {
             // Mark the current buffer position
 
             int end = 0;
             //
-            // Reading the URI
+            // Reading the URI    读取URI
             //
             boolean space = false;
             while (!space) {
@@ -474,7 +469,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                     parsingRequestLineEol = true;
                     space = true;
                     end = pos;
-                } else if (chr == Constants.QUESTION && parsingRequestLineQPos == -1) {
+                } else if (chr == Constants.QUESTION && parsingRequestLineQPos == -1) { // chr == Constants.QUESTION 说明携带了参数
                     parsingRequestLineQPos = pos;
                 } else if (parsingRequestLineQPos != -1 && !httpParser.isQueryRelaxed(chr)) {
                     // Avoid unknown protocol triggering an additional error
@@ -490,6 +485,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                     throw new IllegalArgumentException(sm.getString("iib.invalidRequestTarget"));
                 }
             }
+
+            //有查询参数
             if (parsingRequestLineQPos >= 0) {
                 request.queryString().setBytes(byteBuffer.array(), parsingRequestLineQPos + 1,
                         end - parsingRequestLineQPos - 1);
@@ -501,6 +498,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
             }
             parsingRequestLinePhase = 5;
         }
+
+        // 跳过空白符
         if (parsingRequestLinePhase == 5) {
             // Spec says single SP but also be tolerant of multiple and/or HT
             boolean space = true;
@@ -522,6 +521,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
             // Mark the current buffer position
             end = 0;
         }
+
+        // 解析协议版本，如 HTTP/1.1
         if (parsingRequestLinePhase == 6) {
             //
             // Reading the protocol
@@ -558,7 +559,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
             parsingRequestLinePhase = 0;
             parsingRequestLineEol = false;
             parsingRequestLineStart = 0;
-            return true;
+            return true;        //所有都解析完成以后进行返回
         }
         throw new IllegalStateException(
                 "Invalid request line parse phase:" + parsingRequestLinePhase);
@@ -692,13 +693,17 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
     }
 
 
+    /**
+     * init方法是为Http11InputBuffer 内部创建一个读缓冲区byteBuffer，就是这个byteBuffer 在后面的读请求头，header，body 时都会用到，
+     * 这是tomcat的一个核心bytebuffer 初始化bytebuffer的大小：大小为headerBufferSize + socket buffer的大小 headerBufferSize 默认8*1024
+     * socket buffer size 默认是8192
+     */
     void init(SocketWrapperBase<?> socketWrapper) {
 
         wrapper = socketWrapper;
         wrapper.setAppReadBufHandler(this);
 
-        int bufLength = headerBufferSize +
-                wrapper.getSocketBufferHandler().getReadBuffer().capacity();
+        int bufLength = headerBufferSize + wrapper.getSocketBufferHandler().getReadBuffer().capacity();
         if (byteBuffer == null || byteBuffer.capacity() < bufLength) {
             byteBuffer = ByteBuffer.allocate(bufLength);
             byteBuffer.position(0).limit(0);
@@ -706,18 +711,20 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
     }
 
 
-
     // --------------------------------------------------------- Private Methods
 
     /**
      * Attempts to read some data into the input buffer.
      *
+     * 主要做一些逻辑判断，读取请求体时，重置 pos 位置，以重复使用请求头数据后的缓冲区
+     *
      * @return <code>true</code> if more data was added to the input buffer
-     *         otherwise <code>false</code>
+     * otherwise <code>false</code>
      */
     private boolean fill(boolean block) throws IOException {
 
-        if (parsingHeader) {
+        if (parsingHeader) {     // 如果当前处于解析请求头域的状态
+            // 如果已读字节超过了缓冲区的大小，则抛出异常， 请求头数据太大
             if (byteBuffer.limit() >= headerBufferSize) {
                 if (parsingRequestLine) {
                     // Avoid unknown protocol triggering an additional error
@@ -734,13 +741,17 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
             byteBuffer.position(byteBuffer.limit());
         }
         byteBuffer.limit(byteBuffer.capacity());
+
+        // 从通道读取数据
         int nRead = wrapper.read(block, byteBuffer);
+
         byteBuffer.limit(byteBuffer.position()).reset();
         if (nRead > 0) {
             return true;
-        } else if (nRead == -1) {
+        } else if (nRead == -1) {    // 客户端关闭连接
             throw new EOFException(sm.getString("iib.eof.error"));
         } else {
+            // // 读取 0 个字节，说明通道数据还没准备好，继续读取
             return false;
         }
 
@@ -840,8 +851,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
         //
 
         while (headerParsePos == HeaderParsePosition.HEADER_VALUE_START ||
-               headerParsePos == HeaderParsePosition.HEADER_VALUE ||
-               headerParsePos == HeaderParsePosition.HEADER_MULTI_LINE) {
+                headerParsePos == HeaderParsePosition.HEADER_VALUE ||
+                headerParsePos == HeaderParsePosition.HEADER_MULTI_LINE) {
 
             if (headerParsePos == HeaderParsePosition.HEADER_VALUE_START) {
                 // Skipping spaces
@@ -970,6 +981,31 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
 
     // ----------------------------------------------------------- Inner classes
 
+    @Override
+    public ByteBuffer getByteBuffer() {
+        return byteBuffer;
+    }
+
+    @Override
+    public void setByteBuffer(ByteBuffer buffer) {
+        byteBuffer = buffer;
+    }
+
+    @Override
+    public void expand(int size) {
+        if (byteBuffer.capacity() >= size) {
+            byteBuffer.limit(size);
+        }
+        ByteBuffer temp = ByteBuffer.allocate(size);
+        temp.put(byteBuffer);
+        byteBuffer = temp;
+        byteBuffer.mark();
+        temp = null;
+    }
+
+
+    // ------------------------------------- InputStreamInputBuffer Inner Class
+
     private enum HeaderParseStatus {
         DONE, HAVE_MORE_HEADERS, NEED_MORE_DATA
     }
@@ -1014,7 +1050,6 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
         HEADER_SKIPLINE
     }
 
-
     private static class HeaderParseData {
         /**
          * When parsing header name: first character of the header.<br>
@@ -1043,6 +1078,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
          * header name and is created after the name has been parsed.
          */
         MessageBytes headerValue = null;
+
         public void recycle() {
             start = 0;
             realPos = 0;
@@ -1051,9 +1087,6 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
         }
     }
 
-
-    // ------------------------------------- InputStreamInputBuffer Inner Class
-
     /**
      * This class is an input buffer which will read its data from an input
      * stream.
@@ -1061,9 +1094,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
     private class SocketInputBuffer implements InputBuffer {
 
         /**
-         *
          * @deprecated Unused. Will be removed in Tomcat 9. Use
-         *             {@link #doRead(ApplicationBufferHandler)}
+         * {@link #doRead(ApplicationBufferHandler)}
          */
         @Deprecated
         @Override
@@ -1099,30 +1131,5 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
 
             return length;
         }
-    }
-
-
-    @Override
-    public void setByteBuffer(ByteBuffer buffer) {
-        byteBuffer = buffer;
-    }
-
-
-    @Override
-    public ByteBuffer getByteBuffer() {
-        return byteBuffer;
-    }
-
-
-    @Override
-    public void expand(int size) {
-        if (byteBuffer.capacity() >= size) {
-            byteBuffer.limit(size);
-        }
-        ByteBuffer temp = ByteBuffer.allocate(size);
-        temp.put(byteBuffer);
-        byteBuffer = temp;
-        byteBuffer.mark();
-        temp = null;
     }
 }

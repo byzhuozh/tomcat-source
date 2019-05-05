@@ -99,6 +99,8 @@ final class StandardWrapperValve
         // This should be a Request attribute...
         long t1=System.currentTimeMillis();
         requestCount.incrementAndGet();
+
+        // 获取 StandardWrapper（封装了Servlet） 实例调用 allocate 方法获取 Stack 中的 Servlet 实例
         StandardWrapper wrapper = (StandardWrapper) getContainer();
         Servlet servlet = null;
         Context context = (Context) wrapper.getParent();
@@ -131,6 +133,7 @@ final class StandardWrapperValve
         // Allocate a servlet instance to process this request
         try {
             if (!unavailable) {
+                // 调用 allocate 方法获取 Stack 中的 Servlet 实例
                 servlet = wrapper.allocate();
             }
         } catch (UnavailableException e) {
@@ -168,12 +171,15 @@ final class StandardWrapperValve
         request.setAttribute(Globals.DISPATCHER_TYPE_ATTR,dispatcherType);
         request.setAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR,
                 requestPathMB);
+
         // Create the filter chain for this request
+        // 获取创建过滤器链工厂的单例
         ApplicationFilterChain filterChain =
                 ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);
 
         // Call the filter chain for this request
         // NOTE: This also calls the servlet's service() method
+        // 执行过滤器链 filterChain 的 doFilter 方法。该方法会循环执行所有的过滤器，最终执行 servlet 的 servie 方法
         try {
             if ((servlet != null) && (filterChain != null)) {
                 // Swallow output if needed
@@ -183,8 +189,9 @@ final class StandardWrapperValve
                         if (request.isAsyncDispatching()) {
                             request.getAsyncContextInternal().doInternalDispatch();
                         } else {
-                            filterChain.doFilter(request.getRequest(),
-                                    response.getResponse());
+
+                            // 执行过滤器
+                            filterChain.doFilter(request.getRequest(), response.getResponse());
                         }
                     } finally {
                         String log = SystemLogHandler.stopCapture();

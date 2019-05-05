@@ -74,7 +74,7 @@ public class TestHttp11InputBuffer extends TomcatBaseTest {
 
                 String[] request = new String[1];
                 request[0] =
-                    "GET http://localhost:8080/test HTTP/1.1" + CRLF +
+                    "GET http://localhost:8080/test?name=zzh HTTP/1.1" + CRLF +
                     "Host: localhost:8080" + CRLF +
                     "X-Bug48839: abcd" + CRLF +
                     "\tefgh" + CRLF +

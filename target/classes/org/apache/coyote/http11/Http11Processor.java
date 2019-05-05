@@ -239,6 +239,7 @@ public class Http11Processor extends AbstractProcessor {
         response.setOutputBuffer(outputBuffer);
 
         // Create and add the identity filters.
+        // tomcat 通过filter来 读body，IdentityInputFilter 读非Chunk body
         inputBuffer.addFilter(new IdentityInputFilter(maxSwallowSize));
         outputBuffer.addFilter(new IdentityOutputFilter());
 
@@ -666,7 +667,9 @@ public class Http11Processor extends AbstractProcessor {
 
         // Setting up the I/O
         setSocketWrapper(socketWrapper);
+        //初始化读缓冲区,inputBuffer即Http11InputBuffer
         inputBuffer.init(socketWrapper);    // 设置输入流
+        //初始化写缓冲区
         outputBuffer.init(socketWrapper);   // 设置输出流
 
         // Flags
@@ -681,9 +684,15 @@ public class Http11Processor extends AbstractProcessor {
 
             // Parsing the request header
             try {
+                // 解析 http 请求头 request line
+                // eg：GET http://localhost:8080/test?name=zhuozh HTTP/1.1
                 if (!inputBuffer.parseRequestLine(keptAlive)) {
+
+                    //如果没有读到完整的请求行，parsingRequestLinePhase 是 1
                     if (inputBuffer.getParsingRequestLinePhase() == -1) {
                         return SocketState.UPGRADING;
+
+                    //如果没有读到一个完整的请求头，则需要等待继续读，即需要重新注册读事件
                     } else if (handleIncompleteRequestLineRead()) {
                         break;
                     }
@@ -697,6 +706,8 @@ public class Http11Processor extends AbstractProcessor {
                     keptAlive = true;
                     // Set this every time in case limit has been changed via JMX
                     request.getMimeHeaders().setLimit(endpoint.getMaxHeaderCount());
+
+                    // 解析请求头
                     if (!inputBuffer.parseHeaders()) {
                         // We've read part of the request, don't recycle it
                         // instead associate it with the socket
@@ -890,7 +901,7 @@ public class Http11Processor extends AbstractProcessor {
                 return SocketState.SENDFILE;
             } else {
                 if (openSocket) {
-                    if (readComplete) {
+                    if (readComplete) {  // {@link Http11Processor.handleIncompleteRequestLineRead()} -> readComplete = false
                         return SocketState.OPEN;
                     } else {
                         return SocketState.LONG;
@@ -932,6 +943,7 @@ public class Http11Processor extends AbstractProcessor {
                 return false;
             } else {
                 // Need to keep processor associated with socket
+                // 把 processor 和 socker 继续关联
                 readComplete = false;
             }
         }

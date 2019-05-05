@@ -791,6 +791,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
                 if (processor == null) {
                     // 如果从缓存中没取到, 从可以循环使用的 SynchronizedStack 获取
+                    // tomcat 对关键的类都实现了重用，以减少频繁创建和销毁的开销，会从recycledProcessors 里pop出来
                     processor = recycledProcessors.pop();
                     if (getLog().isDebugEnabled()) {
                         getLog().debug(sm.getString("abstractConnectionHandler.processorPop",
@@ -876,10 +877,13 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     // In the middle of processing a request/response. Keep the
                     // socket associated with the processor. Exact requirements
                     // depend on type of long poll
+
+                    // 如果读取的数据没有读完,那么重新在之前的poller线程重新监听数据.然后有数据的话就重新之前的动作.
                     longPoll(wrapper, processor);
                     if (processor.isAsync()) {
                         getProtocol().addWaitingProcessor(processor);
                     }
+
                 } else if (state == SocketState.OPEN) {
                     // In keep-alive but between requests. OK to recycle
                     // processor. Continue to poll for the next request.

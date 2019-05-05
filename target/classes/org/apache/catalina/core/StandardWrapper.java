@@ -759,7 +759,11 @@ public class StandardWrapper extends ContainerBase
 
         // If not SingleThreadedModel, return the same instance every time
         if (!singleThreadModel) {
+
             // Load and initialize our instance if necessary
+            //  判断该类（StandardWrapper）中的 Servlet 实例是否为null，默认不为null，该实例在初始化的时候就已经注入，
+            // 如果没有注入，则调用 loadServlet 方法，反射加载实例（注意，如果这个servlet 实现了 singleThreadModel 接口，
+            // 该StandardWrapper 就是多个servlet 实例的，默认是单个实例，多个实例会放入一个Stack（这个栈不是早就不建议使用了吗） 类型的栈中
             if (instance == null || !instanceInitialized) {
                 synchronized (this) {
                     if (instance == null) {
@@ -770,6 +774,7 @@ public class StandardWrapper extends ContainerBase
 
                             // Note: We don't know if the Servlet implements
                             // SingleThreadModel until we have loaded it.
+                            // 调用 loadServlet 方法，反射加载实例
                             instance = loadServlet();
                             newInstance = true;
                             if (!singleThreadModel) {
@@ -796,6 +801,7 @@ public class StandardWrapper extends ContainerBase
                     // Have to do this outside of the sync above to prevent a
                     // possible deadlock
                     synchronized (instancePool) {
+                        // Servlet 实例入栈
                         instancePool.push(instance);
                         nInstances++;
                     }

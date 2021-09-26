@@ -530,6 +530,7 @@ public class Catalina {
         initNaming();
 
         // Create and execute our Digester
+        // 定义 server.xml 解析规则
         Digester digester = createStartDigester();
 
         InputSource inputSource = null;
@@ -621,7 +622,9 @@ public class Catalina {
 
         // Start the new server
         try {
+            //初始化 StandServer
             getServer().init();
+
         } catch (LifecycleException e) {
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {
                 throw new java.lang.Error(e);

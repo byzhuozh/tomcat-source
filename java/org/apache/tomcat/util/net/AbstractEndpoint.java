@@ -1127,7 +1127,10 @@ public abstract class AbstractEndpoint<S> {
 
     public void init() throws Exception {
         if (bindOnInit) {
+
+            //绑定端口
             bind();
+
             bindState = BindState.BOUND_ON_INIT;
         }
         if (this.domain != null) {

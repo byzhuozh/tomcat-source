@@ -273,9 +273,11 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
             // Create worker collection
             if ( getExecutor() == null ) {
+                //创建线程池 核心池10， 最大线程数200
                 createExecutor();
             }
 
+            //初始化最大连接数 10000
             initializeConnectionLatch();
 
             // Start poller threads [多核下，默认是 2 个线程数]
@@ -493,7 +495,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
                 try {
                     //if we have reached max connections, wait
-                    // 如果已经达到最大连接，就等待 (默认最大连接数 1000)
+                    // 如果已经达到最大连接，就等待 (默认最大连接数 10000)
                     countUpOrAwaitConnection();
 
                     SocketChannel socket = null;
@@ -856,7 +858,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
                 try {
                     if (!close) {
-                        // 执行PollerEvent的run方法，将SocketChannel注册到自己的Selector上，并返回 true，表示有事件进来了
+                        // 执行PollerEvent的run方法，将SocketChannel注册到自己(Poller)的Selector上，并返回 true，表示有事件进来了
                         hasEvents = events();
                         if (wakeupCounter.getAndSet(-1) > 0) {
                             //if we are here, means we have other stuff to do

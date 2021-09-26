@@ -1575,6 +1575,7 @@ public class HostConfig implements LifecycleListener {
         }
 
         if (host.getDeployOnStartup())
+            // 解析 war 包
             deployApps();
 
     }

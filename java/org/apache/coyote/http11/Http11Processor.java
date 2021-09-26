@@ -684,7 +684,7 @@ public class Http11Processor extends AbstractProcessor {
 
             // Parsing the request header
             try {
-                // 解析 http 请求头 request line
+                // 解析 http 请求行 request line
                 // eg：GET http://localhost:8080/test?name=zhuozh HTTP/1.1
                 if (!inputBuffer.parseRequestLine(keptAlive)) {
 

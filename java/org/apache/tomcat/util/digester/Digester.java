@@ -1251,7 +1251,7 @@ public class Digester extends DefaultHandler2 {
                     if (debug) {
                         log.debug("  Fire begin() for " + rule);
                     }
-                    //规则解析
+                    //规则解析   Server一共有三个Rule，分别是ObjectCreateRule、SetPropertiesRule、SetNextRule
                     rule.begin(namespaceURI, name, list);
                 } catch (Exception e) {
                     log.error("Begin event threw exception", e);

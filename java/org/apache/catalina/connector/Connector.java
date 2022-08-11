@@ -231,6 +231,8 @@ public class Connector extends LifecycleMBeanBase  {
 
     /**
      * Coyote protocol handler.
+     *
+     * 即： Http11NioProtocol 的实例化对象
      */
     protected final ProtocolHandler protocolHandler;
 
@@ -971,7 +973,7 @@ public class Connector extends LifecycleMBeanBase  {
         // Initialize adapter
         // 初始化一个适配器
         adapter = new CoyoteAdapter(this);
-        // 设置 Http11Protocol 的适配器为刚刚创建的 CoyoteAdapter 适配器
+        // 设置 protocolHandler = Http11Protocol 的适配器为刚刚创建的 CoyoteAdapter 适配器
         protocolHandler.setAdapter(adapter);
 
         // Make sure parseBodyMethodsSet has a default

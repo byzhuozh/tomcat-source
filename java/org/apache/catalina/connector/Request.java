@@ -518,12 +518,14 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
     protected void recycleSessionInfo() {
         if (session != null) {
             try {
-                session.endAccess();
+                session.endAccess();    // 更新时间戳
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 log.warn(sm.getString("coyoteRequest.sessionEndAccessFail"), t);
             }
         }
+
+        // 回收 Request 对象的内部信息
         session = null;
         requestedSessionCookie = false;
         requestedSessionId = null;
@@ -2448,6 +2450,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
      */
     @Override
     public HttpSession getSession() {
+        // 通过 managerBase.sessions 获取 Session
         Session session = doGetSession(true);
         if (session == null) {
             return null;
@@ -2985,16 +2988,18 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
 
 
     // ------------------------------------------------------ Protected Methods
-
+    // create 代表是否创建 StandardSession
     protected Session doGetSession(boolean create) {
 
         // There cannot be a session if no context has been assigned yet
+        // 1. 检验 StandardContext
         Context context = getContext();
         if (context == null) {
             return (null);
         }
 
         // Return the current session if it exists and is valid
+        // 2. 校验 Session 的有效性
         if ((session != null) && !session.isValid()) {
             session = null;
         }
@@ -3003,29 +3008,38 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
         }
 
         // Return the requested session if it exists and is valid
+        //拿到 StandardContext 中对应的 StandardManager，Context与 Manager 是一对一的关系
         Manager manager = context.getManager();
         if (manager == null) {
             return (null);      // Sessions are not supported
         }
         if (requestedSessionId != null) {
             try {
+                // 3. 通过 managerBase.sessions 获取 Session
+                // 4. 通过客户端的 sessionId 从 managerBase.sessions 来获取 Session 对象
                 session = manager.findSession(requestedSessionId);
             } catch (IOException e) {
                 session = null;
             }
+
+            // 5. 判断 session 是否有效
             if ((session != null) && !session.isValid()) {
                 session = null;
             }
             if (session != null) {
+                // 6. session access +1
                 session.access();
                 return (session);
             }
         }
 
         // Create a new session if requested and the response is not committed
+        // 7. 根据标识是否创建 StandardSession ( false 直接返回)
         if (!create) {
             return (null);
         }
+
+        // 当前的 Context 是否支持通过 cookie 的方式来追踪 Session
         if (response != null
                 && context.getServletContext()
                         .getEffectiveSessionTrackingModes()
@@ -3041,6 +3055,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
         if (requestedSessionSSL) {
             // If the session ID has been obtained from the SSL handshake then
             // use it.
+            // 8. 到这里其实是没有找到 session, 直接创建 Session 出来
         } else if (("/".equals(context.getSessionCookiePath())
                 && isRequestedSessionIdFromCookie())) {
             /* This is the common(ish) use case: using the same session ID with
@@ -3076,17 +3091,18 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
         } else {
             sessionId = null;
         }
+
+        // 9. 从客户端读取 sessionID, 并且根据这个 sessionId 创建 Session
         session = manager.createSession(sessionId);
 
         // Creating a new session cookie based on that session
         if (session != null
-                && context.getServletContext()
-                        .getEffectiveSessionTrackingModes()
-                        .contains(SessionTrackingMode.COOKIE)) {
+                && context.getServletContext().getEffectiveSessionTrackingModes().contains(SessionTrackingMode.COOKIE)) {
+            // 10. 根据 sessionId 来创建一个 Cookie
             Cookie cookie =
-                ApplicationSessionCookieConfig.createSessionCookie(
-                        context, session.getIdInternal(), isSecure());
+                    ApplicationSessionCookieConfig.createSessionCookie(context, session.getIdInternal(), isSecure());
 
+            // 11. 最后在响应体中写入 cookie
             response.addSessionCookieInternal(cookie);
         }
 
@@ -3094,6 +3110,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
             return null;
         }
 
+        // 12. session access 计数器 + 1
         session.access();
         return session;
     }

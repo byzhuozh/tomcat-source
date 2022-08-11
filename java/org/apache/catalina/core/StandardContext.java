@@ -16,97 +16,11 @@
  */
 package org.apache.catalina.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.management.ListenerNotFoundException;
-import javax.management.MBeanNotificationInfo;
-import javax.management.Notification;
-import javax.management.NotificationBroadcasterSupport;
-import javax.management.NotificationEmitter;
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
-import javax.naming.NamingException;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.ServletRegistration.Dynamic;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletSecurityElement;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionIdListener;
-import javax.servlet.http.HttpSessionListener;
-
-import org.apache.catalina.Authenticator;
-import org.apache.catalina.Container;
-import org.apache.catalina.ContainerListener;
-import org.apache.catalina.Context;
-import org.apache.catalina.CredentialHandler;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.LifecycleState;
-import org.apache.catalina.Loader;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Pipeline;
-import org.apache.catalina.Realm;
-import org.apache.catalina.ThreadBindingListener;
-import org.apache.catalina.Valve;
-import org.apache.catalina.WebResource;
-import org.apache.catalina.WebResourceRoot;
-import org.apache.catalina.Wrapper;
+import org.apache.catalina.*;
 import org.apache.catalina.deploy.NamingResourcesImpl;
 import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.session.StandardManager;
-import org.apache.catalina.util.CharsetMapper;
-import org.apache.catalina.util.ContextName;
-import org.apache.catalina.util.ErrorPageSupport;
-import org.apache.catalina.util.ExtensionValidator;
-import org.apache.catalina.util.URLEncoder;
+import org.apache.catalina.util.*;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -119,22 +33,38 @@ import org.apache.tomcat.util.IntrospectionUtils;
 import org.apache.tomcat.util.buf.StringUtils;
 import org.apache.tomcat.util.buf.UDecoder;
 import org.apache.tomcat.util.descriptor.XmlIdentifiers;
-import org.apache.tomcat.util.descriptor.web.ApplicationParameter;
-import org.apache.tomcat.util.descriptor.web.ErrorPage;
-import org.apache.tomcat.util.descriptor.web.FilterDef;
-import org.apache.tomcat.util.descriptor.web.FilterMap;
-import org.apache.tomcat.util.descriptor.web.Injectable;
-import org.apache.tomcat.util.descriptor.web.InjectionTarget;
-import org.apache.tomcat.util.descriptor.web.LoginConfig;
-import org.apache.tomcat.util.descriptor.web.MessageDestination;
-import org.apache.tomcat.util.descriptor.web.MessageDestinationRef;
-import org.apache.tomcat.util.descriptor.web.SecurityCollection;
-import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.apache.tomcat.util.descriptor.web.*;
 import org.apache.tomcat.util.http.CookieProcessor;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.apache.tomcat.util.security.PrivilegedGetTccl;
 import org.apache.tomcat.util.security.PrivilegedSetTccl;
+
+import javax.management.*;
+import javax.naming.NamingException;
+import javax.servlet.*;
+import javax.servlet.ServletRegistration.Dynamic;
+import javax.servlet.descriptor.JspConfigDescriptor;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionIdListener;
+import javax.servlet.http.HttpSessionListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Standard implementation of the <b>Context</b> interface.  Each
@@ -4953,6 +4883,7 @@ public class StandardContext extends ContainerBase
         for (ArrayList<Wrapper> list : map.values()) {
             for (Wrapper wrapper : list) {
                 try {
+                    // 执行 Servlet 的 init 操作
                     wrapper.load();
                 } catch (ServletException e) {
                     getLogger().error(sm.getString("standardContext.loadOnStartup.loadException",
@@ -5040,8 +4971,7 @@ public class StandardContext extends ContainerBase
         // Validate required extensions
         boolean dependencyCheck = true;
         try {
-            dependencyCheck = ExtensionValidator.validateApplication
-                (getResources(), this);
+            dependencyCheck = ExtensionValidator.validateApplication(getResources(), this);
         } catch (IOException ioe) {
             log.error(sm.getString("standardContext.extensionValidationError"), ioe);
             dependencyCheck = false;
@@ -5134,6 +5064,7 @@ public class StandardContext extends ContainerBase
                 }
 
                 // Notify our interested LifecycleListeners
+                // 触发 CONFIGURE_START_EVENT事件，加载 web.xml
                 fireLifecycleEvent(Lifecycle.CONFIGURE_START_EVENT, null);
 
                 // Start our child containers, if not already started
@@ -5193,8 +5124,7 @@ public class StandardContext extends ContainerBase
 
             // We put the resources into the servlet context
             if (ok)
-                getServletContext().setAttribute
-                    (Globals.RESOURCES_ATTR, getResources());
+                getServletContext().setAttribute(Globals.RESOURCES_ATTR, getResources());
 
             if (ok ) {
                 if (getInstanceManager() == null) {
@@ -5214,8 +5144,7 @@ public class StandardContext extends ContainerBase
 
             // Create context attributes that will be required
             if (ok) {
-                getServletContext().setAttribute(
-                        JarScanner.class.getName(), getJarScanner());
+                getServletContext().setAttribute(JarScanner.class.getName(), getJarScanner());
             }
 
             // Set up the context init params
@@ -5235,6 +5164,7 @@ public class StandardContext extends ContainerBase
             }
 
             // Configure and call application event listeners
+            // 实例化listeners及其初始化
             if (ok) {
                 if (!listenerStart()) {
                     log.error(sm.getString("standardContext.listenerFail"));
@@ -5261,6 +5191,7 @@ public class StandardContext extends ContainerBase
             }
 
             // Configure and call application filters
+            // 配置和初始化filters
             if (ok) {
                 if (!filterStart()) {
                     log.error(sm.getString("standardContext.filterFail"));
@@ -5269,6 +5200,7 @@ public class StandardContext extends ContainerBase
             }
 
             // Load and initialize all "load on startup" servlets
+            // 实例化及初始化所有带<load-on-startup>配置的servlets
             if (ok) {
                 if (!loadOnStartup(findChildren())){
                     log.error(sm.getString("standardContext.servletFail"));
@@ -5605,6 +5537,7 @@ public class StandardContext extends ContainerBase
         if (!getState().isAvailable())
             return;
 
+        // 热加载 class，或者 jsp
         Loader loader = getLoader();
         if (loader != null) {
             try {
@@ -5614,6 +5547,8 @@ public class StandardContext extends ContainerBase
                         "standardContext.backgroundProcess.loader", loader), e);
             }
         }
+
+        // 清理过期Session
         Manager manager = getManager();
         if (manager != null) {
             try {
@@ -5624,6 +5559,8 @@ public class StandardContext extends ContainerBase
                         e);
             }
         }
+
+        // 清理资源文件的缓存
         WebResourceRoot resources = getResources();
         if (resources != null) {
             try {
@@ -5634,6 +5571,8 @@ public class StandardContext extends ContainerBase
                         resources), e);
             }
         }
+
+        // 清理对象或class信息缓存
         InstanceManager instanceManager = getInstanceManager();
         if (instanceManager instanceof DefaultInstanceManager) {
             try {
@@ -5644,6 +5583,8 @@ public class StandardContext extends ContainerBase
                         resources), e);
             }
         }
+
+        // 调用子容器的 backgroundProcess 任务
         super.backgroundProcess();
     }
 

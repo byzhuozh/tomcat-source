@@ -97,6 +97,7 @@ public abstract class LifecycleBase implements Lifecycle {
         // 循环通知所有生命周期时间侦听器
         for (LifecycleListener listener : lifecycleListeners) {
             // 每个监听器都有自己的逻辑
+            // 触发 ContextConfig.lifecycleEvent 进行 web.xml 初始化
             listener.lifecycleEvent(event);
         }
     }

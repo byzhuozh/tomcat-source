@@ -17,38 +17,22 @@
 package org.apache.catalina.session;
 
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Deque;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleState;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionIdGenerator;
+import org.apache.catalina.*;
 import org.apache.catalina.util.LifecycleMBeanBase;
 import org.apache.catalina.util.SessionIdGeneratorBase;
 import org.apache.catalina.util.StandardSessionIdGenerator;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 
 /**
@@ -134,6 +118,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
      * The set of currently active Sessions for this Manager, keyed by
      * session identifier.
      */
+    //Manager管理着当前Context的所有session
     protected Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     // Number of sessions created by this manager
@@ -529,7 +514,9 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
      */
     @Override
     public void backgroundProcess() {
+        // processExpiresFrequency 默认值为 6，而backgroundProcess默认每隔10s调用一次，也就是说除了任务执行的耗时，每隔 60s 执行一次
         count = (count + 1) % processExpiresFrequency;
+        // 默认每隔 60s 执行一次 Session 清理
         if (count == 0)
             processExpires();
     }
@@ -540,12 +527,13 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
     public void processExpires() {
 
         long timeNow = System.currentTimeMillis();
-        Session sessions[] = findSessions();
+        Session sessions[] = findSessions();   // 获取所有的 Session
         int expireHere = 0 ;
 
         if(log.isDebugEnabled())
             log.debug("Start expire sessions " + getName() + " at " + timeNow + " sessioncount " + sessions.length);
         for (int i = 0; i < sessions.length; i++) {
+            // Session 的过期是在 isValid() 里面处理的
             if (sessions[i]!=null && !sessions[i].isValid()) {
                 expireHere++;
             }
@@ -553,6 +541,8 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         long timeEnd = System.currentTimeMillis();
         if(log.isDebugEnabled())
              log.debug("End expire sessions " + getName() + " processingTime " + (timeEnd - timeNow) + " expired sessions: " + expireHere);
+
+        // 记录下处理时间
         processingTime += ( timeEnd - timeNow );
 
     }
@@ -618,6 +608,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
 
     @Override
     public void add(Session session) {
+        //将创建的Seesion存入Map<String, Session> sessions = new ConcurrentHashMap<>();
         sessions.put(session.getIdInternal(), session);
         int size = getActiveSessions();
         if( size > maxActive ) {
@@ -639,6 +630,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
     @Override
     public Session createSession(String sessionId) {
 
+        // 1. 判断 单节点的 Session 个数是否超过限制
         if ((maxActiveSessions >= 0) &&
                 (getActiveSessions() >= maxActiveSessions)) {
             rejectedSessions++;
@@ -648,23 +640,34 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         }
 
         // Recycle or create a Session instance
+        // 创建一个 空的 session
+        // 2. 创建 Session
         Session session = createEmptySession();
 
         // Initialize the properties of the new session and return it
+        // 初始化空 session 的属性
         session.setNew(true);
         session.setValid(true);
         session.setCreationTime(System.currentTimeMillis());
+        // 3. StandardSession 最大的默认 Session 激活时间
         session.setMaxInactiveInterval(getContext().getSessionTimeout() * 60);
         String id = sessionId;
+
+        // 若没有从 client 端读取到 jsessionId
         if (id == null) {
+            // 4. 生成 sessionId (这里通过随机数来生成)
             id = generateSessionId();
         }
+        //这里会将session存入Map<String, Session> sessions = new ConcurrentHashMap<>();
         session.setId(id);
         sessionCounter++;
 
         SessionTiming timing = new SessionTiming(session.getCreationTime(), 0);
         synchronized (sessionCreationTiming) {
+            // 5. 每次创建 Session 都会创建一个 SessionTiming, 并且 push 到 链表 sessionCreationTiming 的最后
             sessionCreationTiming.add(timing);
+            // 6. 并且将 链表 最前面的节点删除
+            // sessionCreationTiming 是用来统计 Session的新建及失效的频率 (好像Zookeeper 里面也有这个的统计方式)
             sessionCreationTiming.poll();
         }
         return (session);

@@ -441,7 +441,7 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    /**
+    /**COn
      * Process the default configuration file, if it exists.
      * @param digester The digester that will be used for XML parsing
      */
@@ -767,6 +767,8 @@ public class ContextConfig implements LifecycleListener {
                     Boolean.valueOf(context.getXmlNamespaceAware())));
         }
 
+        // 解析tomcat/conf/web.xml、tomcat\conf\Catalina\web.xml.default、tomcat\webapps\Context名称\WEB-INF\web.xml
+        // 及tomcat/lib下的所有jar中的web-fragment.xml，将所有这些web.xml配置整合到WebXml中，进而配置给StandardContext
         webConfig();
 
         context.addServletContainerInitializer(new JasperInitializer(), null);
@@ -1102,11 +1104,13 @@ public class ContextConfig implements LifecycleListener {
                 context.getXmlValidation(), context.getXmlBlockExternal());
 
         Set<WebXml> defaults = new HashSet<>();
+        // 解析tomcat/conf/web.xml、tomcat\conf\Catalina\web.xml.default
         defaults.add(getDefaultWebXmlFragment(webXmlParser));
 
         WebXml webXml = createWebXml();
 
         // Parse context level web.xml
+        // 解析tomcat\webapps\Context名称\WEB-INF\web.xml
         InputSource contextWebXml = getContextWebXmlSource();
         if (!webXmlParser.parseWebXml(contextWebXml, webXml, false)) {
             ok = false;
@@ -1120,6 +1124,7 @@ public class ContextConfig implements LifecycleListener {
         // provided by the container. If any of the application JARs have a
         // web-fragment.xml it will be parsed at this point. web-fragment.xml
         // files are ignored for container provided JARs.
+        // 解析tomcat/lib下的所有jar中的web-fragment.xml
         Map<String,WebXml> fragments = processJarsForWebFragments(webXml, webXmlParser);
 
         // Step 2. Order the fragments.
@@ -1141,6 +1146,7 @@ public class ContextConfig implements LifecycleListener {
             // Step 6. Merge web-fragment.xml files into the main web.xml
             // file.
             if (ok) {
+                // 整合 web-fragment.xml配置
                 ok = webXml.merge(orderedFragments);
             }
 
@@ -1155,6 +1161,7 @@ public class ContextConfig implements LifecycleListener {
             }
 
             // Step 9. Apply merged web.xml to Context
+            // WebXml 配置给 StandardContext
             if (ok) {
                 configureContext(webXml);
             }
@@ -1249,6 +1256,7 @@ public class ContextConfig implements LifecycleListener {
         context.setEffectiveMajorVersion(webxml.getMajorVersion());
         context.setEffectiveMinorVersion(webxml.getMinorVersion());
 
+        // 设置context-param 参数
         for (Entry<String, String> entry : webxml.getContextParams().entrySet()) {
             context.addParameter(entry.getKey(), entry.getValue());
         }
@@ -1325,6 +1333,7 @@ public class ContextConfig implements LifecycleListener {
         for (ContextService service : webxml.getServiceRefs().values()) {
             context.getNamingResources().addService(service);
         }
+        // 获取webxml中定义的servlets 包装成StandardWrapper
         for (ServletDef servlet : webxml.getServlets().values()) {
             Wrapper wrapper = context.createWrapper();
             // Description is ignored
@@ -1332,7 +1341,7 @@ public class ContextConfig implements LifecycleListener {
             // Icons are ignored
 
             // jsp-file gets passed to the JSP Servlet as an init-param
-
+            // 将servlet相关属性放入wrapper
             if (servlet.getLoadOnStartup() != null) {
                 wrapper.setLoadOnStartup(servlet.getLoadOnStartup().intValue());
             }
@@ -1372,12 +1381,15 @@ public class ContextConfig implements LifecycleListener {
                         servlet.getAsyncSupported().booleanValue());
             }
             wrapper.setOverridable(servlet.isOverridable());
+            // 获取到wrapper后执行servlet的init初始化
             context.addChild(wrapper);
         }
+
         for (Entry<String, String> entry :
                 webxml.getServletMappings().entrySet()) {
             context.addServletMappingDecoded(entry.getKey(), entry.getValue());
         }
+
         SessionConfig sessionConfig = webxml.getSessionConfig();
         if (sessionConfig != null) {
             if (sessionConfig.getSessionTimeout() != null) {

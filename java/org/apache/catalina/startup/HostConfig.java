@@ -1143,10 +1143,8 @@ public class HostConfig implements LifecycleListener {
 
             // Fake re-deploy resource to detect if a WAR is added at a later
             // point
-            deployedApp.redeployResources.put(dir.getAbsolutePath() + ".war",
-                    Long.valueOf(0));
-            deployedApp.redeployResources.put(dir.getAbsolutePath(),
-                    Long.valueOf(dir.lastModified()));
+            deployedApp.redeployResources.put(dir.getAbsolutePath() + ".war", Long.valueOf(0));
+            deployedApp.redeployResources.put(dir.getAbsolutePath(), Long.valueOf(dir.lastModified()));
             if (deployThisXML && xml.exists()) {
                 if (copyThisXml) {
                     deployedApp.redeployResources.put(

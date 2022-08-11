@@ -540,7 +540,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
     /**
      * @return the specified Service (if it exists); otherwise return
      * <code>null</code>.
-     *
+     *CoyoteAdapter
      * @param name Name of the Service to be returned
      */
     @Override

@@ -758,6 +758,7 @@ public class StandardWrapper extends ContainerBase
         boolean newInstance = false;
 
         // If not SingleThreadedModel, return the same instance every time
+        // 如果Wrapper没有实现SingleThreadedModel，则每次都会返回同一个Servlet
         if (!singleThreadModel) {
 
             // Load and initialize our instance if necessary

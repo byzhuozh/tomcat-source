@@ -242,25 +242,31 @@ public class OutputBuffer extends Writer {
 
         // If there are chars, flush all of them to the byte buffer now as bytes are used to
         // calculate the content-length (if everything fits into the byte buffer, of course).
-        if (cb.remaining() > 0) {
-            flushCharBuffer();
+        if (cb.remaining() > 0) {  // 1. 这里 cb 里面的数据就是 Response.getPrintWriter.write("OK") 写到 CharChunk 里面
+            flushCharBuffer();  // 2. 将 CharChunk 里面的数据刷到 OutputBuffer中 (PS: 这里就是将 CharChunk 里面的数据刷到 ByteChunk 里面), 期间转化会经过字符转化器
         }
 
-        if ((!coyoteResponse.isCommitted()) && (coyoteResponse.getContentLengthLong() == -1)
+        //如果没有发送响应头，而且没有设置content-length
+        if ((!coyoteResponse.isCommitted())   // 3. 这里的 coyoteResponse 是 coyote 的 response
+                && (coyoteResponse.getContentLengthLong() == -1)
                 && !coyoteResponse.getRequest().method().equals("HEAD")) {
             // If this didn't cause a commit of the response, the final content
             // length can be calculated. Only do this if this is not a HEAD
             // request since in that case no body should have been written and
             // setting a value of zero here will result in an explicit content
             // length of zero being set on the response.
-            if (!coyoteResponse.isCommitted()) {
+            if (!coyoteResponse.isCommitted()) {  // 4. 设置 Http header 里面 content-length 的长度 (也就是你在 HttpServlet 里面调用CoyoteWriter.print/write 写入的数据的大小)
+                //到这里是第一次提交，内容就是buffer的大小，这里设置后，在准备响应头会知道outout filter为identiy filter
                 coyoteResponse.setContentLength(bb.remaining());
             }
         }
 
+        // 5. 下面的 doFlush 其实就是将 org.apache.catalina.connector.Response.OutputBuffer 中的 CharChunk, ByteChunk 的数据(body中的数据,
+        // 也就是一开始在 MyHttpServlet中 PrintWriter.write("OK")的数据刷到 Http11Processor.InternalOutputBuffer里面, 当然里面还涉及到 header 中的数据
         if (coyoteResponse.getStatus() == HttpServletResponse.SC_SWITCHING_PROTOCOLS) {
             doFlush(true);
         } else {
+            //不需要flush，后面通过ActionCode.CLOSE刷新
             doFlush(false);
         }
         closed = true;
@@ -271,6 +277,7 @@ public class OutputBuffer extends Writer {
         Request req = (Request) coyoteResponse.getRequest().getNote(CoyoteAdapter.ADAPTER_NOTES);
         req.inputBuffer.close();
 
+        // 结束响应的操作
         coyoteResponse.action(ActionCode.CLOSE, null);
     }
 
@@ -301,12 +308,18 @@ public class OutputBuffer extends Writer {
         try {
             doFlush = true;
             if (initial) {
+                // 2. coyoteResponse 就是 org.apache.coyote.Response (将 Http header 里面的信息 刷到 headBuffer 中, 然后刷到 socketBuffer 中,
+                // 这里的 headBuffer 与 sendBuffer 都是在 Http11Processor 中)
                 coyoteResponse.sendHeaders();
                 initial = false;
             }
+
+            //通过write写的数据在char buffer里，需要把转换到byte buffer
             if (cb.remaining() > 0) {
                 flushCharBuffer();
             }
+
+            //通过outputStream写的字节，则把byteBuffer里的数据写到socket的writeBuffer
             if (bb.remaining() > 0) {
                 flushByteBuffer();
             }
@@ -536,9 +549,11 @@ public class OutputBuffer extends Writer {
         int sOff = off;
         int sEnd = off + len;
         while (sOff < sEnd) {
+            //cb是CharBuffer，把字符串s写入到charBuffer中。
             int n = transfer(s, sOff, sEnd - sOff, cb);
             sOff += n;
             if (isFull(cb)) {
+                //写满了，刷新charBuffer，把char buffer 写到byte buffer
                 flushCharBuffer();
             }
         }
@@ -902,8 +917,7 @@ public class OutputBuffer extends Writer {
     }
 
     private void toReadMode(Buffer buffer) {
-        buffer.limit(buffer.position())
-              .reset();
+        buffer.limit(buffer.position()).reset();
     }
 
     private void toWriteMode(Buffer buffer) {

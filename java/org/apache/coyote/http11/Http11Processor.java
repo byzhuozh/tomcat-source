@@ -1259,8 +1259,7 @@ public class Http11Processor extends AbstractProcessor {
         if (statusCode < 200 || statusCode == 204 || statusCode == 205 ||
                 statusCode == 304) {
             // No entity body
-            outputBuffer.addActiveFilter
-                (outputFilters[Constants.VOID_FILTER]);
+            outputBuffer.addActiveFilter(outputFilters[Constants.VOID_FILTER]);
             entityBody = false;
             contentDelimitation = true;
             if (statusCode == 205) {
@@ -1275,8 +1274,7 @@ public class Http11Processor extends AbstractProcessor {
         MessageBytes methodMB = request.method();
         if (methodMB.equals("HEAD")) {
             // No entity body
-            outputBuffer.addActiveFilter
-                (outputFilters[Constants.VOID_FILTER]);
+            outputBuffer.addActiveFilter(outputFilters[Constants.VOID_FILTER]);
             contentDelimitation = true;
         }
 
@@ -1308,25 +1306,24 @@ public class Http11Processor extends AbstractProcessor {
             }
             String contentLanguage = response.getContentLanguage();
             if (contentLanguage != null) {
-                headers.setValue("Content-Language")
-                    .setString(contentLanguage);
+                headers.setValue("Content-Language").setString(contentLanguage);
             }
         }
 
         long contentLength = response.getContentLengthLong();
         boolean connectionClosePresent = false;
         if (contentLength != -1) {
+            //如果指定了content-length,指定写数据的filter为IDENTITY_FILTER
             headers.setValue("Content-Length").setLong(contentLength);
-            outputBuffer.addActiveFilter
-                (outputFilters[Constants.IDENTITY_FILTER]);
+            outputBuffer.addActiveFilter(outputFilters[Constants.IDENTITY_FILTER]);
             contentDelimitation = true;
         } else {
             // If the response code supports an entity body and we're on
             // HTTP 1.1 then we chunk unless we have a Connection: close header
             connectionClosePresent = isConnectionClose(headers);
             if (entityBody && http11 && !connectionClosePresent) {
-                outputBuffer.addActiveFilter
-                    (outputFilters[Constants.CHUNKED_FILTER]);
+                //如果是1.1,而且没有主动close，则用chunk格式发送body，对应的fiter为chunk filter
+                outputBuffer.addActiveFilter(outputFilters[Constants.CHUNKED_FILTER]);
                 contentDelimitation = true;
                 headers.addValue(Constants.TRANSFERENCODING).setString(Constants.CHUNKED);
             } else {
@@ -1335,6 +1332,7 @@ public class Http11Processor extends AbstractProcessor {
             }
         }
 
+        //如果需要压缩，则增加压缩的output filter
         if (useCompression) {
             outputBuffer.addActiveFilter(outputFilters[Constants.GZIP_FILTER]);
             headers.setValue("Content-Encoding").setString("gzip");
@@ -1358,8 +1356,7 @@ public class Http11Processor extends AbstractProcessor {
         // Add date header unless application has already set one (e.g. in a
         // Caching Filter)
         if (headers.getValue("Date") == null) {
-            headers.addValue("Date").setString(
-                    FastHttpDateFormat.getCurrentDate());
+            headers.addValue("Date").setString(FastHttpDateFormat.getCurrentDate());
         }
 
         // FIXME: Add transfer encoding header
@@ -1401,12 +1398,15 @@ public class Http11Processor extends AbstractProcessor {
 
         // Build the response header
         try {
+            //生成响应行的内容
             outputBuffer.sendStatus();
 
+            //生成响应头的内容
             int size = headers.size();
             for (int i = 0; i < size; i++) {
                 outputBuffer.sendHeader(headers.getName(i), headers.getValue(i));
             }
+            //生成响应头的结束标志：换行和回车符
             outputBuffer.endHeaders();
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -1416,6 +1416,7 @@ public class Http11Processor extends AbstractProcessor {
             throw t;
         }
 
+        //把headerBuffer的数据copy到socket的writerBuffer，最终flush的时候发送到网络上
         outputBuffer.commit();
     }
 

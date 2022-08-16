@@ -170,20 +170,28 @@ public class NioSelectorPool {
             while ( (!timedout) && buf.hasRemaining() ) {
                 int cnt = 0;
                 if ( keycount > 0 ) { //only write if we were registered for a write
+                    //开始写，这里buf是socket的write buffer，默认是堆buffer
+                    //这里需要做一次copy，先到堆外，再到写缓冲区
                     cnt = socket.write(buf); //write the data
                     if (cnt == -1) throw new EOFException();
 
                     written += cnt;
                     if (cnt > 0) {
+                        //如果cnt大于0，说明能写，不管写了多少，都继续写，直到不能写，
+                        //返回0，则到下面的逻辑，说明不能写了，则阻塞，直到可以写
                         time = System.currentTimeMillis(); //reset our timeout timer
                         continue; //we successfully wrote, try again without a selector
                     }
                     if (cnt==0 && (!block)) break; //don't block
                 }
+
                 if ( selector != null ) {
                     //register OP_WRITE to the selector
-                    if (key==null) key = socket.getIOChannel().register(selector, SelectionKey.OP_WRITE);
-                    else key.interestOps(SelectionKey.OP_WRITE);
+                    //注册一个写事件到NioBlockingSelector上
+                    if (key==null)
+                        key = socket.getIOChannel().register(selector, SelectionKey.OP_WRITE);
+                    else
+                        key.interestOps(SelectionKey.OP_WRITE);
                     if (writeTimeout==0) {
                         timedout = buf.hasRemaining();
                     } else if (writeTimeout<0) {
@@ -192,7 +200,8 @@ public class NioSelectorPool {
                         keycount = selector.select(writeTimeout);
                     }
                 }
-                if (writeTimeout > 0 && (selector == null || keycount == 0) ) timedout = (System.currentTimeMillis()-time)>=writeTimeout;
+                if (writeTimeout > 0 && (selector == null || keycount == 0) )
+                    timedout = (System.currentTimeMillis()-time)>=writeTimeout;
             }//while
             if ( timedout ) throw new SocketTimeoutException();
         } finally {

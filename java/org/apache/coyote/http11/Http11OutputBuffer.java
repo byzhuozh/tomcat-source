@@ -216,6 +216,9 @@ public class Http11OutputBuffer implements HttpOutputBuffer {
             // Send the connector a request for commit. The connector should
             // then validate the headers, send them (using sendHeaders) and
             // set the filters accordingly.
+            // 如果response还没有提交过则调用Http11Processor的prepareResponse()方法
+            // 把响应状态以及响应头写入SocketChannel。
+            // 即：准备响应头，写到 Http11OutputBuffer 的 headerBuffer
             response.action(ActionCode.COMMIT, null);
         }
 
@@ -344,6 +347,8 @@ public class Http11OutputBuffer implements HttpOutputBuffer {
             // Sending the response header buffer
             headerBuffer.flip();
             try {
+                //通过socket开始写，写body也是通过这个方法写
+                //默认是阻塞写，如果是aio，则是异步写
                 socketWrapper.write(isBlocking(), headerBuffer);
             } finally {
                 headerBuffer.position(0).limit(headerBuffer.capacity());

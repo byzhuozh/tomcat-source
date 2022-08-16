@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.WriteListener;
 
+import org.apache.coyote.http11.Http11OutputBuffer;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.buf.B2CConverter;
@@ -599,6 +600,7 @@ public final class Response {
      */
     public void doWrite(ByteBuffer chunk) throws IOException {
         int len = chunk.remaining();
+       // outputBuffer 即： Http11OutputBuffer
         outputBuffer.doWrite(chunk);
         contentWritten += len - chunk.remaining();
     }

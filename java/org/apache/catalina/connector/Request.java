@@ -1678,6 +1678,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
 
     @Override
     public AsyncContext startAsync() {
+        // 开启异步组件
         return startAsync(getRequest(),response.getResponse());
     }
 
@@ -1687,17 +1688,20 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
         if (!isAsyncSupported()) {
             IllegalStateException ise =
                     new IllegalStateException(sm.getString("request.asyncNotSupported"));
-            log.warn(sm.getString("coyoteRequest.noAsync",
-                    StringUtils.join(getNonAsyncClassNames())), ise);
+            log.warn(sm.getString("coyoteRequest.noAsync", StringUtils.join(getNonAsyncClassNames())), ise);
             throw ise;
         }
 
+        // connectorRequest 中创建 asyncContext
         if (asyncContext == null) {
             asyncContext = new AsyncContextImpl(this);
         }
 
+        // 将状态机的状态从DISPATCHED --> STARTING
         asyncContext.setStarted(getContext(), request, response,
-                request==getRequest() && response==getResponse().getResponse());
+                request == getRequest() && response == getResponse().getResponse());
+
+        // 设置超时时间 默认时间为30s
         asyncContext.setTimeout(getConnector().getAsyncTimeout());
 
         return asyncContext;

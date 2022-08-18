@@ -143,19 +143,19 @@ public class AsyncStateMachine {
     private static final StringManager sm = StringManager.getManager(AsyncStateMachine.class);
 
     private enum AsyncState {
-        DISPATCHED      (false, false, false, false),
-        STARTING        (true,  true,  false, false),
-        STARTED         (true,  true,  false, false),
-        MUST_COMPLETE   (true,  true,  true,  false),
-        COMPLETE_PENDING(true,  true,  false, false),
-        COMPLETING      (true,  false, true,  false),
-        TIMING_OUT      (true,  true,  false, false),
-        MUST_DISPATCH   (true,  true,  false, true),
-        DISPATCH_PENDING(true,  true,  false, false),
-        DISPATCHING     (true,  false, false, true),
-        READ_WRITE_OP   (true,  true,  false, false),
-        MUST_ERROR      (true,  true,  false, false),
-        ERROR           (true,  true,  false, false);
+        DISPATCHED(false, false, false, false),
+        STARTING(true, true, false, false),
+        STARTED(true, true, false, false),
+        MUST_COMPLETE(true, true, true, false),
+        COMPLETE_PENDING(true, true, false, false),
+        COMPLETING(true, false, true, false),
+        TIMING_OUT(true, true, false, false),
+        MUST_DISPATCH(true, true, false, true),
+        DISPATCH_PENDING(true, true, false, false),
+        DISPATCHING(true, false, false, true),
+        READ_WRITE_OP(true, true, false, false),
+        MUST_ERROR(true, true, false, false),
+        ERROR(true, true, false, false);
 
         private final boolean isAsync;
         private final boolean isStarted;
@@ -163,7 +163,7 @@ public class AsyncStateMachine {
         private final boolean isDispatching;
 
         private AsyncState(boolean isAsync, boolean isStarted, boolean isCompleting,
-                boolean isDispatching) {
+                           boolean isDispatching) {
             this.isAsync = isAsync;
             this.isStarted = isStarted;
             this.isCompleting = isCompleting;
@@ -234,11 +234,10 @@ public class AsyncStateMachine {
     }
 
     /**
-     * Obtain the time that this connection last transitioned to async
-     * processing.
+     * Obtain the time that this connection last transitioned to async processing.
      *
-     * @return The time (as returned by {@link System#currentTimeMillis()}) that
-     *         this connection last transitioned to async
+     * @return The time (as returned by {@link System#currentTimeMillis()}) that this connection last transitioned to
+     * async
      */
     public long getLastAsyncStart() {
         return lastAsyncStart;
@@ -262,7 +261,7 @@ public class AsyncStateMachine {
     }
 
     public synchronized void asyncOperation() {
-        if (state==AsyncState.STARTED) {
+        if (state == AsyncState.STARTED) {
             state = AsyncState.READ_WRITE_OP;
         } else {
             throw new IllegalStateException(
@@ -283,11 +282,12 @@ public class AsyncStateMachine {
         } else if (state == AsyncState.DISPATCH_PENDING) {
             doDispatch();
             return SocketState.ASYNC_END;
-        } else  if (state == AsyncState.STARTING || state == AsyncState.READ_WRITE_OP) {
+        } else if (state == AsyncState.STARTING || state == AsyncState.READ_WRITE_OP) {
             state = AsyncState.STARTED;
             return SocketState.LONG;
         } else if (state == AsyncState.MUST_COMPLETE || state == AsyncState.COMPLETING) {
             asyncCtxt.fireOnComplete();
+            //异步场景：此时状态机状态状态调整 调度结束
             state = AsyncState.DISPATCHED;
             return SocketState.ASYNC_END;
         } else if (state == AsyncState.MUST_DISPATCH) {
@@ -329,8 +329,7 @@ public class AsyncStateMachine {
             doComplete = true;
         } else {
             throw new IllegalStateException(
-                    sm.getString("asyncStateMachine.invalidAsyncState",
-                            "asyncComplete()", state));
+                    sm.getString("asyncStateMachine.invalidAsyncState", "asyncComplete()", state));
         }
         return doComplete;
     }
@@ -443,7 +442,7 @@ public class AsyncStateMachine {
     }
 
     public synchronized void asyncRun(Runnable runnable) {
-        if (state == AsyncState.STARTING || state ==  AsyncState.STARTED ||
+        if (state == AsyncState.STARTING || state == AsyncState.STARTED ||
                 state == AsyncState.READ_WRITE_OP) {
             // Execute the runnable using a container thread from the
             // Connector's thread pool. Use a wrapper to prevent a memory leak

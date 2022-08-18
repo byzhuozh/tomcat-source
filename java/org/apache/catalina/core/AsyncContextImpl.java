@@ -93,6 +93,8 @@ public class AsyncContextImpl implements AsyncContext, AsyncContextCallback {
             logDebug("complete   ");
         }
         check();
+
+        //调用Request对象的action方法，其实就是通知连接器，这个异步请求处理完了
         request.getCoyoteRequest().action(ActionCode.ASYNC_COMPLETE, null);
     }
 
@@ -320,8 +322,7 @@ public class AsyncContextImpl implements AsyncContext, AsyncContextCallback {
             ServletResponse response, boolean originalRequestResponse) {
 
         synchronized (asyncContextLock) {
-            this.request.getCoyoteRequest().action(
-                    ActionCode.ASYNC_START, this);
+            this.request.getCoyoteRequest().action(ActionCode.ASYNC_START, this);
 
             this.context = context;
             context.incrementInProgressAsyncCount();
@@ -386,8 +387,7 @@ public class AsyncContextImpl implements AsyncContext, AsyncContextCallback {
     public void setTimeout(long timeout) {
         check();
         this.timeout = timeout;
-        request.getCoyoteRequest().action(ActionCode.ASYNC_SETTIMEOUT,
-                Long.valueOf(timeout));
+        request.getCoyoteRequest().action(ActionCode.ASYNC_SETTIMEOUT, Long.valueOf(timeout));
     }
 
 
@@ -525,8 +525,7 @@ public class AsyncContextImpl implements AsyncContext, AsyncContextCallback {
     private void check() {
         if (request == null) {
             // AsyncContext has been recycled and should not be being used
-            throw new IllegalStateException(sm.getString(
-                    "asyncContextImpl.requestEnded"));
+            throw new IllegalStateException(sm.getString("asyncContextImpl.requestEnded"));
         }
     }
 

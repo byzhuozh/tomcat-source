@@ -53,7 +53,7 @@ public abstract class AbstractProcessorLight implements Processor {
                     || isUpgrade()
                     || state == SocketState.ASYNC_END) {     // 如果是异步的情况
 
-                state = dispatch(status);
+                state = dispatch(status); // 如果是异步的话，则 state = SocketState.LONG
 
                 if (state == SocketState.OPEN) {
                     // There may be pipe-lined data to read. If the data isn't
@@ -83,7 +83,7 @@ public abstract class AbstractProcessorLight implements Processor {
             }
 
             if (state != SocketState.CLOSED && isAsync()) {
-                state = asyncPostProcess();
+                state = asyncPostProcess();  // 异步场景：state = SocketState.ASYNC_END
                 if (getLog().isDebugEnabled()) {
                     getLog().debug("Socket: [" + socketWrapper +
                             "], State after async post processing: [" + state + "]");

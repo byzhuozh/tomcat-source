@@ -498,7 +498,7 @@ public abstract class AbstractProcessor extends AbstractProcessorLight implement
         }
         case ASYNC_COMPLETE: {
             clearDispatches();
-            if (asyncStateMachine.asyncComplete()) {
+            if (asyncStateMachine.asyncComplete()) { // 此时状态机状态会调整为： AsyncState.COMPLETING
                 processSocketEvent(SocketEvent.OPEN_READ, true);
             }
             break;

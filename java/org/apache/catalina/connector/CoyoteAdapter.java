@@ -149,6 +149,7 @@ public class CoyoteAdapter implements Adapter {
                 response.setSuspended(false);
             }
 
+            // 触发asyncContext中异步监听器的超时方法
             if (status==SocketEvent.TIMEOUT) {
                 if (!asyncConImpl.timeout()) {
                     asyncConImpl.setErrorState(null, false);
@@ -186,8 +187,7 @@ public class CoyoteAdapter implements Adapter {
                     try {
                         oldCL = request.getContext().bind(false, null);
                         res.onWritePossible();
-                        if (request.isFinished() && req.sendAllDataReadEvent() &&
-                                readListener != null) {
+                        if (request.isFinished() && req.sendAllDataReadEvent() && readListener != null) {
                             readListener.onAllDataRead();
                         }
                     } catch (Throwable t) {
@@ -225,21 +225,20 @@ public class CoyoteAdapter implements Adapter {
             // Has an error occurred during async processing that needs to be
             // processed by the application's error page mechanism (or Tomcat's
             // if the application doesn't define one)?
-            if (!request.isAsyncDispatching() && request.isAsync() &&
-                    response.isErrorReportRequired()) {
-                connector.getService().getContainer().getPipeline().getFirst().invoke(
-                        request, response);
+            if (!request.isAsyncDispatching() && request.isAsync() && response.isErrorReportRequired()) {
+                connector.getService().getContainer().getPipeline().getFirst().invoke(request, response);
             }
 
+            //这里判断异步正在进行，说明这不是一个完成方法的回调，是一个正常异步请求，继续调用容器。
             if (request.isAsyncDispatching()) {
-                connector.getService().getContainer().getPipeline().getFirst().invoke(
-                        request, response);
+                connector.getService().getContainer().getPipeline().getFirst().invoke(request, response);
                 Throwable t = (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
                 if (t != null) {
                     asyncConImpl.setErrorState(t, true);
                 }
             }
 
+            //注意，这里，如果超时或者出错，request.isAsync()会返回false，这里是为了尽快的输出错误给客户端。
             if (!request.isAsync()) {
                 request.finishRequest();
                 response.finishResponse();
@@ -270,7 +269,7 @@ public class CoyoteAdapter implements Adapter {
                 res.setStatus(500);
             }
 
-            // Access logging
+            // 销毁 request 和 response
             if (!success || !request.isAsync()) {
                 long time = 0;
                 if (req.getStartTime() != -1) {
@@ -352,6 +351,7 @@ public class CoyoteAdapter implements Adapter {
             }
             if (request.isAsync()) {
                 async = true;
+
                 ReadListener readListener = req.getReadListener();
                 if (readListener != null && request.isFinished()) {
                     // Possible the all data may have been read during service()
